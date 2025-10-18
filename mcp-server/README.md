@@ -1,15 +1,8 @@
-# Contract Manager Ecosystem
+# MCP Server
 
-A comprehensive contract management system built with the Model Context Protocol (MCP), featuring an MCP server, authentication service, web UI, and MCP Inspector for development.
+The core Model Context Protocol server for the Contract Manager ecosystem. Built with Express.js and TypeScript, this service handles contract management operations and provides MCP endpoints for client applications.
 
-## Architecture
-
-This ecosystem consists of multiple services that work together:
-
-- **MCP Server** - Core contract management MCP server
-- **Auth Server** - OAuth2 authentication service _(to do)_
-- **Web UI** - Frontend application with MCP UI components _(to do)_
-- **MCP Inspector** - Development and debugging tool _(to do)_
+This service is part of the larger Contract Manager ecosystem. See the [root README](../README.md) for information about the full system.
 
 ## Changelog
 
@@ -68,7 +61,6 @@ mcp-server/
    ```
 
 2. **Open in Dev Container:**
-
    - Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac)
    - Type "Remote-Containers: Reopen in Container"
    - Wait for the container to build and dependencies to install

@@ -134,20 +134,30 @@ const server = app.listen(PORT, () => {
   console.log(`🔐 Auth endpoint: http://localhost:${PORT}/auth`);
 });
 
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  server.close(() => {
-    console.log('Process terminated');
-    process.exit(0);
-  });
-});
+// Graceful shutdown with timeout
+const gracefulShutdown = (signal: string) => {
+  console.log(`${signal} received, shutting down gracefully`);
 
-process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
-  server.close(() => {
-    console.log('Process terminated');
+  const shutdownTimeout = setTimeout(() => {
+    console.log('Forced shutdown due to timeout');
+    process.exit(1);
+  }, 10000); // 10 second timeout
+
+  server.close(err => {
+    clearTimeout(shutdownTimeout);
+    if (err) {
+      console.error('Error during shutdown:', err);
+      process.exit(1);
+    }
+    console.log('Process terminated gracefully');
     process.exit(0);
   });
-});
+
+  // Force close any remaining connections
+  server.closeAllConnections?.();
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
 export default app;

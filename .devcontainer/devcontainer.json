@@ -1,0 +1,52 @@
+{
+  "name": "MCP Server Development",
+  "image": "node:22-bullseye",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-json",
+        "christian-kohler.path-intellisense",
+        "dbaeumer.vscode-eslint",
+        "ms-vscode.js-debug"
+      ],
+      "settings": {
+        "typescript.preferences.importModuleSpecifier": "relative",
+        "typescript.suggest.autoImports": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit"
+        }
+      }
+    }
+  },
+  "forwardPorts": [3000, 8080, 9229],
+  "portsAttributes": {
+    "3000": {
+      "label": "Express Server",
+      "onAutoForward": "notify"
+    },
+    "8080": {
+      "label": "MCP Inspector",
+      "onAutoForward": "notify"
+    },
+    "9229": {
+      "label": "Debug Port",
+      "onAutoForward": "silent"
+    }
+  },
+  "postCreateCommand": "npm install",
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "configureZshAsDefaultShell": true,
+      "username": "node"
+    }
+  },
+
+  "remoteUser": "node",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}"
+}

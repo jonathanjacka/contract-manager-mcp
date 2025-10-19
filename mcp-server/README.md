@@ -22,6 +22,18 @@ This service is part of the larger Contract Manager ecosystem. See the [root REA
 - ✅ **Environment Configuration**: Local .env file with development defaults (git-ignored)
 - ✅ **Graceful Shutdown**: Proper SIGTERM/SIGINT handling for clean shutdowns
 
+### MCP Integration (v1.1.0)
+
+- ✅ **MCP Server Implementation**: Full Model Context Protocol server with StreamableHTTPServerTransport
+- ✅ **MCP Inspector Support**: Container-friendly inspector setup with proper port forwarding (6274, 6277)
+- ✅ **Colored Logging**: Chalk-based logging system with organized logger utilities
+- ✅ **Constants Management**: Centralized server configuration and response templates
+- ✅ **Environment Variables**: dotenv integration for proper configuration management
+- ✅ **Minimal Server Structure**: Clean, testable server for MCP protocol development
+- ✅ **Container Inspector**: MCP Inspector running inside dev container with HOST=0.0.0.0 binding
+- ✅ **Modern TypeScript**: Updated to tsx for faster, cleaner TypeScript execution
+- ✅ **Dependency Cleanup**: Removed unused packages, kept only essential dependencies
+
 ## Project Structure
 
 ```
@@ -78,10 +90,24 @@ mcp-server/
 
 ### Available Scripts
 
+**Development:**
+
 - `npm run dev` - Start development server with hot reload
 - `npm run dev:inspect` - Start with Node.js inspector for debugging
+- `npm run dev:with-inspector` - Start both server and MCP Inspector
+
+**MCP Inspector:**
+
+- `npm run inspector:container` - Start MCP Inspector for dev container (HOST=0.0.0.0)
+- `npm run inspector:connect` - Start MCP Inspector and auto-connect to local server
+
+**Build & Production:**
+
 - `npm run build` - Build for production
 - `npm run start` - Start production server
+
+**Code Quality:**
+
 - `npm run lint` - Run ESLint
 - `npm run lint:fix` - Fix ESLint issues
 - `npm run format` - Format code with Prettier
@@ -140,23 +166,81 @@ To customize your environment:
 
 ### Health & Info
 
-- `GET /health` - Health check endpoint
-- `GET /api` - API information and available endpoints
-- `GET /` - Welcome message
+- `GET /health` - Health check endpoint with server status
+- `GET /mcp` - MCP server information (browser-friendly JSON response)
 
-### Future Endpoints
+### MCP Protocol
 
-- `GET /mcp` - MCP server endpoint (placeholder)
-- `GET /auth` - OAuth2 authentication endpoint (placeholder)
+- `POST /mcp` - MCP JSON-RPC endpoint for Model Context Protocol requests
 
-## Development Container Features
+### Capabilities
+
+Current server capabilities:
+
+- **Tools**: 0 (minimal server setup)
+- **Resources**: 0 (ready for expansion)
+- **Prompts**: 0 (ready for expansion)
+
+## MCP Inspector Setup
+
+### Running in Dev Container
+
+The MCP Inspector is configured to run inside the dev container with proper networking:
+
+```bash
+# Start MCP Inspector (container-friendly)
+npm run inspector:container
+
+# Or run directly with environment variable
+HOST=0.0.0.0 npx @modelcontextprotocol/inspector
+```
+
+### Accessing the Inspector
+
+1. **Start the Inspector** (it will show a URL with auth token)
+2. **Open in browser**: `http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=<token>`
+3. **Manual auth setup** (if needed):
+   - Click "Configuration" in the Inspector UI
+   - Find "Proxy Session Token"
+   - Enter the token from the terminal output
+   - Click "Save"
+
+### Connecting to Your Server
+
+In the MCP Inspector UI:
+
+- **Transport**: Streamable HTTP
+- **Server URL**: `http://localhost:3000/mcp`
+- Click "Connect"
+
+**Note**: If you get connection issues, you may need to manually add the proxy auth token to the Inspector UI configuration.
+
+### Troubleshooting
+
+**Inspector UI spinning/not loading:**
+
+- Ensure you're using `npm run inspector:container` in the dev container
+- Check that ports 6274 and 6277 are forwarded in your devcontainer.json
+- Try manually entering the proxy auth token in the Inspector configuration
+
+**Can't connect to MCP server:**
+
+- Verify your MCP server is running on `http://localhost:3000/mcp`
+- Use "Streamable HTTP" transport type
+- Check the browser console for CORS or network errors
+
+### Development Container Features
 
 The dev container includes:
 
 - Node.js 22 runtime
 - TypeScript and development tools pre-installed
 - VS Code extensions for TypeScript, ESLint, Prettier
-- Port forwarding for development server (3000), MCP inspector (8080), and debugging (9229)
+- **Port forwarding**:
+  - `3000` - MCP Server
+  - `6274` - MCP Inspector UI
+  - `6277` - MCP Inspector Proxy
+  - `9229` - Node.js debugging
 - Git configuration
 - Zsh with Oh My Zsh
 

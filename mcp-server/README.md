@@ -34,6 +34,18 @@ This service is part of the larger Contract Manager ecosystem. See the [root REA
 - ✅ **Modern TypeScript**: Updated to tsx for faster, cleaner TypeScript execution
 - ✅ **Dependency Cleanup**: Removed unused packages, kept only essential dependencies
 
+### Database Implementation (v1.2.0)
+
+- ✅ **SQLite Database**: Lightweight, file-based database perfect for development
+- ✅ **Knex.js Integration**: TypeScript-first query builder with migrations and seeding
+- ✅ **Complete Schema**: Programs, Contracts, Tasks, Employees, Tags with proper relationships
+- ✅ **UUID Primary Keys**: All entities use UUIDs for unique identification
+- ✅ **Foreign Key Constraints**: Proper referential integrity with cascade deletes
+- ✅ **Audit Timestamps**: created_at and updated_at on all entities
+- ✅ **Rich Seed Data**: Realistic employee and project data for testing
+- ✅ **Service Layer**: Type-safe CRUD operations and relationship queries
+- ✅ **Auto-initialization**: Database setup and seeding on every server startup
+
 ## Project Structure
 
 ```
@@ -41,8 +53,20 @@ mcp-server/
 ├── src/                    # TypeScript source code
 │   ├── index.ts           # Main MCP server with HTTP transport
 │   ├── constants.ts       # Centralized server configuration
+│   ├── types/             # TypeScript type definitions
+│   │   └── database.ts    # Database entity interfaces
+│   ├── database/          # Database configuration and management
+│   │   ├── connection.ts  # Knex configuration and connection
+│   │   ├── migrations/    # Database schema migrations
+│   │   │   └── 001_create_initial_tables.ts
+│   │   └── seeds/         # Database seed data
+│   │       └── 001_initial_data.ts
+│   ├── services/          # Business logic and data access
+│   │   └── database.ts    # Database service layer
 │   └── utils/             # Logging and utility functions
 │       └── logger.ts      # Colored logging with chalk
+├── database/               # SQLite database files
+│   └── contract_manager.sqlite3  # Main database file (generated)
 ├── public/                 # Static assets
 ├── dist/                   # Compiled JavaScript (generated)
 ├── node_modules/           # Dependencies (generated)
@@ -167,6 +191,44 @@ To customize your environment:
    ```
 
 **Note:** The `.env` file is ignored by git to keep your local configuration private.
+
+## Database Schema
+
+The server uses a SQLite database with a comprehensive contract management schema:
+
+### Core Entities
+
+- **Programs**: Top-level organizational units with assigned managers
+- **Contracts**: Specific agreements tied to programs
+- **Tasks**: Individual work items within contracts with completion tracking (0-10 scale)
+- **Employees**: Team members with roles and contact information
+- **Tags**: Flexible categorization system for tasks
+
+### Relationships
+
+- Programs have exactly one manager (Employee) and can contain multiple Contracts
+- Contracts belong to one Program and can contain multiple Tasks
+- Tasks belong to one Contract and can be assigned to multiple Employees
+- Tasks can have multiple Tags for categorization
+- All entities include audit timestamps (created_at, updated_at)
+
+### Database Features
+
+- **Auto-initialization**: Database is created and seeded on every server startup
+- **UUID Primary Keys**: All entities use UUIDs for unique identification
+- **Foreign Key Constraints**: Proper referential integrity with cascade deletes
+- **Type Safety**: Full TypeScript interfaces for all entities and operations
+- **Service Layer**: Clean CRUD operations via `services/database.ts`
+
+### Sample Data
+
+The database includes realistic sample data with:
+
+- 5 employees with various roles (Project Manager, Developer, Designer, DevOps, QA)
+- 2 programs representing different business initiatives
+- 3 contracts under active management
+- 7 tasks with varying completion levels
+- 8 tags for task categorization
 
 ## API Endpoints
 

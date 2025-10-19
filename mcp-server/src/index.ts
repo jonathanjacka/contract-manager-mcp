@@ -28,7 +28,7 @@ const mcpServer = new McpServer(
       prompts: {},
     },
     instructions: `
-${SERVER_INFO.displayName}: A simple MCP server for testing connectivity.
+${SERVER_INFO.displayName}: An MCP server for contract management with database integration.
 
 ${SERVER_INFO.description}
     `.trim(),

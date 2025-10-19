@@ -40,6 +40,16 @@ This ecosystem consists of multiple services that work together:
 - ✅ **Dependency Cleanup**: Streamlined dependencies, keeping only essential packages for MCP development
 - ✅ **Container Networking**: Proper dev container port forwarding for MCP Inspector (6274, 6277)
 
+### Database Implementation (v1.2.0)
+
+- ✅ **SQLite Database**: Lightweight, file-based database with contract management schema
+- ✅ **Knex.js Integration**: TypeScript-first query builder with migrations and seeding
+- ✅ **Complete Schema**: Programs, Contracts, Tasks, Employees, Tags with proper relationships
+- ✅ **UUID Primary Keys**: All entities use UUIDs for unique identification
+- ✅ **Auto-initialization**: Database setup and seeding on every server startup
+- ✅ **Service Layer**: Type-safe CRUD operations and relationship queries
+- ✅ **Rich Sample Data**: Realistic employee and project data for testing
+
 ## Project Structure
 
 ```
@@ -51,7 +61,11 @@ contract-manager/
     ├── src/              # TypeScript source code
     │   ├── index.ts      # Main MCP server with HTTP transport
     │   ├── constants.ts  # Centralized configuration
+    │   ├── types/        # TypeScript type definitions
+    │   ├── database/     # Database configuration and migrations
+    │   ├── services/     # Business logic and data access
     │   └── utils/        # Logging and utility functions
+    ├── database/         # SQLite database files
     ├── dist/             # Compiled JavaScript (generated)
     ├── package.json      # Dependencies and MCP-focused scripts
     ├── tsconfig.json     # TypeScript configuration
@@ -177,12 +191,21 @@ To customize your environment:
 
 - `POST /mcp` - MCP JSON-RPC endpoint for Model Context Protocol requests
 
+### Database
+
+The MCP server includes a complete contract management database with:
+
+- **Programs**, **Contracts**, **Tasks**, **Employees**, and **Tags**
+- **UUID primary keys** and proper foreign key relationships
+- **Automatic seeding** with sample data on server startup
+- **Type-safe service layer** for all data operations
+
 ### Future Services
 
 - **Auth Server** - OAuth2 authentication endpoints _(to do)_
 - **Web UI** - Frontend application with MCP integration _(to do)_
 
-**For detailed API documentation and MCP capabilities, see the [mcp-server README](./mcp-server/README.md).**
+**For detailed database schema, API documentation, and MCP capabilities, see the [mcp-server README](./mcp-server/README.md).**
 
 ## Development Container Features
 

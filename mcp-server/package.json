@@ -1,13 +1,17 @@
 {
   "name": "mcp-server",
   "version": "1.0.0",
-  "description": "A comprehensive MCP server with Express API and OAuth2 authentication",
+  "description": "A minimal MCP server for contract management with HTTP transport",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "nodemon",
     "dev:inspect": "nodemon --inspect=0.0.0.0:9229",
+    "dev:with-inspector": "concurrently \"npm run dev\" \"npm run inspector\"",
+    "inspector": "npx @modelcontextprotocol/inspector",
+    "mcp-stdio": "tsx src/stdio-server.ts",
+    "inspector-with-server": "npx -y @modelcontextprotocol/inspector npx tsx src/stdio-server.ts",
     "clean": "rm -rf dist",
     "prebuild": "npm run clean",
     "prestart": "npm run build",
@@ -36,25 +40,28 @@
     "#middleware/*": "./src/middleware/*"
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "@modelcontextprotocol/sdk": "^1.20.1",
+    "chalk": "^5.6.2",
     "cors": "^2.8.5",
-    "helmet": "^7.1.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
     "morgan": "^1.10.0",
-    "compression": "^1.7.4",
-    "dotenv": "^16.3.1"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
-    "@types/express": "^4.17.21",
+    "@modelcontextprotocol/inspector": "^0.17.1",
     "@types/cors": "^2.8.16",
+    "@types/express": "^4.17.21",
     "@types/morgan": "^1.9.9",
-    "@types/compression": "^1.7.5",
-    "typescript": "^5.3.2",
-    "ts-node": "^10.9.1",
-    "nodemon": "^3.0.2",
+    "@types/node": "^20.10.0",
     "@typescript-eslint/eslint-plugin": "^6.13.1",
     "@typescript-eslint/parser": "^6.13.1",
+    "concurrently": "^9.2.1",
     "eslint": "^8.54.0",
-    "prettier": "^3.1.0"
+    "nodemon": "^3.0.2",
+    "prettier": "^3.1.0",
+    "ts-node": "^10.9.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.3.2"
   }
 }

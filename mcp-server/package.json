@@ -8,18 +8,16 @@
     "start": "node dist/index.js",
     "dev": "nodemon",
     "dev:inspect": "nodemon --inspect=0.0.0.0:9229",
-    "dev:with-inspector": "concurrently \"npm run dev\" \"npm run inspector\"",
-    "inspector": "npx @modelcontextprotocol/inspector",
-    "mcp-stdio": "tsx src/stdio-server.ts",
-    "inspector-with-server": "npx -y @modelcontextprotocol/inspector npx tsx src/stdio-server.ts",
+    "dev:with-inspector": "concurrently \"npm run dev\" \"npm run inspector:container\"",
+    "inspector:container": "HOST=0.0.0.0 npx @modelcontextprotocol/inspector",
+    "inspector:connect": "HOST=0.0.0.0 npx @modelcontextprotocol/inspector http://localhost:3000/mcp",
     "clean": "rm -rf dist",
     "prebuild": "npm run clean",
     "prestart": "npm run build",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "format": "prettier --write src/**/*.ts",
-    "type-check": "tsc --noEmit",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "type-check": "tsc --noEmit"
   },
   "keywords": [
     "mcp",

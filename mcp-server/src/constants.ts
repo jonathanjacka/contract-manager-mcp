@@ -2,7 +2,8 @@ export const SERVER_INFO = {
   name: 'contract-manager',
   displayName: 'Contract Manager MCP Server',
   version: '1.0.0',
-  description: 'A minimal server setup for testing MCP Inspector connectivity.',
+  description:
+    'An MCP server for contract management with SQLite database, featuring programs, contracts, tasks, employees, and tags.',
 } as const;
 
 export const SERVER_CONFIG = {

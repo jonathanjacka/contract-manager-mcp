@@ -5,6 +5,7 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import { logger } from './utils/logger.js';
+import { initializeDatabase, closeDatabase } from './database/connection.js';
 import {
   SERVER_INFO,
   HEALTH_RESPONSE,
@@ -91,11 +92,50 @@ app.post('/mcp', async (req, res) => {
 });
 
 const port = SERVER_CONFIG.getPort();
-app
-  .listen(port, () => {
-    logger.serverStarted(port);
-  })
-  .on('error', error => {
-    logger.serverError(error);
+
+// Start server with database initialization
+async function startServer() {
+  try {
+    // Initialize database first
+    await initializeDatabase();
+
+    // Start the Express server
+    app
+      .listen(port, () => {
+        logger.serverStarted(port);
+      })
+      .on('error', error => {
+        logger.serverError(error);
+        process.exit(1);
+      });
+  } catch (error) {
+    logger.error('Failed to start server:', error);
     process.exit(1);
-  });
+  }
+}
+
+// Graceful shutdown handling
+process.on('SIGTERM', async () => {
+  logger.info('📱 Received SIGTERM, shutting down gracefully...');
+  try {
+    await closeDatabase();
+    process.exit(0);
+  } catch (error) {
+    logger.error('Error during shutdown:', error);
+    process.exit(1);
+  }
+});
+
+process.on('SIGINT', async () => {
+  logger.info('📱 Received SIGINT, shutting down gracefully...');
+  try {
+    await closeDatabase();
+    process.exit(0);
+  } catch (error) {
+    logger.error('Error during shutdown:', error);
+    process.exit(1);
+  }
+});
+
+// Start the server
+startServer();

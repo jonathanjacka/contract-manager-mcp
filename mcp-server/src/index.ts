@@ -6,6 +6,7 @@ import cors from 'cors';
 import morgan from 'morgan';
 import { logger } from './utils/logger.js';
 import { initializeDatabase, closeDatabase } from './database/connection.js';
+import { initializeTools } from './tools.js';
 import {
   SERVER_INFO,
   HEALTH_RESPONSE,
@@ -16,24 +17,33 @@ import {
 
 config();
 
-const mcpServer = new McpServer(
-  {
-    name: SERVER_INFO.name,
-    version: SERVER_INFO.version,
-  },
-  {
-    capabilities: {
-      tools: {},
-      resources: {},
-      prompts: {},
+export class ContractManagerMCP {
+  server = new McpServer(
+    {
+      name: SERVER_INFO.name,
+      version: SERVER_INFO.version,
     },
-    instructions: `
+    {
+      capabilities: {
+        tools: {},
+        resources: {},
+        prompts: {},
+      },
+      instructions: `
 ${SERVER_INFO.displayName}: An MCP server for contract management with database integration.
 
 ${SERVER_INFO.description}
-    `.trim(),
+      `.trim(),
+    }
+  );
+
+  async init() {
+    await initializeTools(this);
   }
-);
+}
+
+// Create global instance
+const contractManagerMCP = new ContractManagerMCP();
 
 const app = express();
 app.use(morgan('dev'));
@@ -73,7 +83,7 @@ app.post('/mcp', async (req, res) => {
       transport.close();
     });
 
-    await mcpServer.connect(transport);
+    await contractManagerMCP.server.connect(transport);
     logger.mcpConnected(mcpMethod, mcpId);
 
     await transport.handleRequest(req, res, req.body);
@@ -99,6 +109,9 @@ async function startServer() {
     // Initialize database first
     await initializeDatabase();
 
+    // Initialize MCP tools and resources
+    await contractManagerMCP.init();
+
     // Start the Express server
     app
       .listen(port, () => {
@@ -114,7 +127,6 @@ async function startServer() {
   }
 }
 
-// Graceful shutdown handling
 process.on('SIGTERM', async () => {
   logger.info('📱 Received SIGTERM, shutting down gracefully...');
   try {
@@ -137,5 +149,4 @@ process.on('SIGINT', async () => {
   }
 });
 
-// Start the server
 startServer();

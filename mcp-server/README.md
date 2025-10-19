@@ -38,22 +38,28 @@ This service is part of the larger Contract Manager ecosystem. See the [root REA
 
 ```
 mcp-server/
-├── .devcontainer/          # Dev container configuration
-│   ├── devcontainer.json   # VS Code dev container settings
-│   └── Dockerfile          # Development Dockerfile
 ├── src/                    # TypeScript source code
-│   └── index.ts           # Main Express server
+│   ├── index.ts           # Main MCP server with HTTP transport
+│   ├── constants.ts       # Centralized server configuration
+│   └── utils/             # Logging and utility functions
+│       └── logger.ts      # Colored logging with chalk
+├── public/                 # Static assets
 ├── dist/                   # Compiled JavaScript (generated)
-├── package.json           # Node.js dependencies and scripts
+├── node_modules/           # Dependencies (generated)
+├── package.json           # Node.js dependencies and MCP-focused scripts
+├── package-lock.json      # Dependency lock file
 ├── tsconfig.json          # TypeScript configuration
 ├── nodemon.json           # Nodemon configuration for hot reload
 ├── .eslintrc.js           # ESLint configuration
 ├── .prettierrc            # Prettier configuration
-├── .env.example           # Environment variables template
+├── .env                   # Environment variables (git-ignored)
+├── .gitignore             # Git ignore patterns
 ├── Dockerfile             # Production Dockerfile
 ├── .dockerignore          # Docker ignore file
 └── README.md              # This file
 ```
+
+**Note:** The dev container configuration (`.devcontainer/`) is located in the root directory of the Contract Manager project, not within the mcp-server folder.
 
 ## Getting Started
 

@@ -6,10 +6,10 @@ A comprehensive contract management system built with the Model Context Protocol
 
 This ecosystem consists of multiple services that work together:
 
-- **MCP Server** - Core contract management MCP server
+- **MCP Server** - Core contract management MCP server with HTTP transport
 - **Auth Server** - OAuth2 authentication service _(to do)_
 - **Web UI** - Frontend application with MCP UI components _(to do)_
-- **MCP Inspector** - Development and debugging tool _(to do)_
+- **MCP Inspector** - Development and debugging tool for MCP protocol testing
 
 ## Changelog
 
@@ -29,25 +29,34 @@ This ecosystem consists of multiple services that work together:
 - ✅ **Environment Configuration**: Local .env file with development defaults (git-ignored)
 - ✅ **Graceful Shutdown**: Proper SIGTERM/SIGINT handling for clean shutdowns
 
+### MCP Integration (v1.1.0)
+
+- ✅ **MCP Server Implementation**: Full Model Context Protocol server with StreamableHTTPServerTransport
+- ✅ **MCP Inspector Support**: Container-friendly inspector setup for MCP protocol development and testing
+- ✅ **Colored Logging System**: Organized logging utilities with chalk-based colored output
+- ✅ **Constants Management**: Centralized server configuration and response templates
+- ✅ **Environment Variables**: Enhanced dotenv integration for proper configuration management
+- ✅ **Modern TypeScript**: Updated to tsx for faster, cleaner TypeScript execution
+- ✅ **Dependency Cleanup**: Streamlined dependencies, keeping only essential packages for MCP development
+- ✅ **Container Networking**: Proper dev container port forwarding for MCP Inspector (6274, 6277)
+
 ## Project Structure
 
 ```
-mcp-server/
-├── .devcontainer/          # Dev container configuration
-│   ├── devcontainer.json   # VS Code dev container settings
-│   └── Dockerfile          # Development Dockerfile
-├── src/                    # TypeScript source code
-│   └── index.ts           # Main Express server
-├── dist/                   # Compiled JavaScript (generated)
-├── package.json           # Node.js dependencies and scripts
-├── tsconfig.json          # TypeScript configuration
-├── nodemon.json           # Nodemon configuration for hot reload
-├── .eslintrc.js           # ESLint configuration
-├── .prettierrc            # Prettier configuration
-├── .env.example           # Environment variables template
-├── Dockerfile             # Production Dockerfile
-├── .dockerignore          # Docker ignore file
-└── README.md              # This file
+contract-manager/
+├── .devcontainer/         # Dev container configuration (root level)
+├── docker-compose.yml     # Multi-service orchestration
+├── README.md             # This file
+└── mcp-server/           # MCP Server service
+    ├── src/              # TypeScript source code
+    │   ├── index.ts      # Main MCP server with HTTP transport
+    │   ├── constants.ts  # Centralized configuration
+    │   └── utils/        # Logging and utility functions
+    ├── dist/             # Compiled JavaScript (generated)
+    ├── package.json      # Dependencies and MCP-focused scripts
+    ├── tsconfig.json     # TypeScript configuration
+    ├── Dockerfile        # Production Docker image
+    └── README.md         # MCP server specific documentation
 ```
 
 ## Getting Started
@@ -63,7 +72,7 @@ mcp-server/
 
    ```bash
    git clone <your-repo-url>
-   cd mcp-server
+   cd contract-manager/mcp-server
    code .
    ```
 
@@ -79,21 +88,34 @@ mcp-server/
    npm run dev
    ```
 
-4. **Access the server:**
-   - Main API: http://localhost:3000
+4. **Access the services:**
+   - MCP Server: http://localhost:3000/mcp
    - Health check: http://localhost:3000/health
-   - API info: http://localhost:3000/api
+   - MCP Inspector: http://localhost:6274 (when running)
+
+**For detailed MCP server setup, scripts, and MCP Inspector usage, see the [mcp-server README](./mcp-server/README.md).**
 
 ### Available Scripts
 
-- `npm run dev` - Start development server with hot reload
-- `npm run dev:inspect` - Start with Node.js inspector for debugging
+**Core Development:**
+
+- `npm run dev` - Start MCP server with hot reload
+- `npm run dev:with-inspector` - Start server and MCP Inspector together
 - `npm run build` - Build for production
 - `npm run start` - Start production server
+
+**MCP Inspector:**
+
+- `npm run inspector:container` - Start MCP Inspector for dev container
+- `npm run inspector:connect` - Start inspector and auto-connect to server
+
+**Code Quality:**
+
 - `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues
 - `npm run format` - Format code with Prettier
-- `npm run type-check` - Run TypeScript type checking
+- `npm run type-check` - TypeScript type checking
+
+**For complete script documentation and MCP Inspector setup, see the [mcp-server README](./mcp-server/README.md).**
 
 ### Environment Configuration
 
@@ -148,34 +170,58 @@ To customize your environment:
 
 ### Health & Info
 
-- `GET /health` - Health check endpoint
-- `GET /api` - API information and available endpoints
-- `GET /` - Welcome message
+- `GET /health` - Health check endpoint with server status
+- `GET /mcp` - MCP server information (browser-friendly JSON response)
 
-### Future Endpoints
+### MCP Protocol
 
-- `GET /mcp` - MCP server endpoint (placeholder)
-- `GET /auth` - OAuth2 authentication endpoint (placeholder)
+- `POST /mcp` - MCP JSON-RPC endpoint for Model Context Protocol requests
+
+### Future Services
+
+- **Auth Server** - OAuth2 authentication endpoints _(to do)_
+- **Web UI** - Frontend application with MCP integration _(to do)_
+
+**For detailed API documentation and MCP capabilities, see the [mcp-server README](./mcp-server/README.md).**
 
 ## Development Container Features
 
 The dev container includes:
 
-- Node.js 22 runtime
-- TypeScript and development tools pre-installed
-- VS Code extensions for TypeScript, ESLint, Prettier
-- Port forwarding for development server (3000), MCP inspector (8080), and debugging (9229)
-- Git configuration
-- Zsh with Oh My Zsh
+- **Node.js 22** runtime with modern TypeScript support
+- **Development tools** pre-installed (ESLint, Prettier, TypeScript)
+- **VS Code extensions** for TypeScript, ESLint, Prettier
+- **Port forwarding**:
+  - `3000` - MCP Server
+  - `6274` - MCP Inspector UI
+  - `6277` - MCP Inspector Proxy
+  - `9229` - Node.js debugging
+- **Git configuration** and Zsh with Oh My Zsh
+- **MCP Inspector** configured for container networking
+
+**For detailed dev container setup and MCP Inspector configuration, see the [mcp-server README](./mcp-server/README.md).**
 
 ## Production Deployment
 
-Build the production Docker image:
+### MCP Server
+
+Build and run the MCP server:
 
 ```bash
-docker build -t mcp-server .
-docker run -p 3000:3000 mcp-server
+cd mcp-server
+docker build -t contract-manager-mcp .
+docker run -p 3000:3000 contract-manager-mcp
 ```
+
+### Multi-Service Deployment
+
+Use Docker Compose for the full ecosystem:
+
+```bash
+docker-compose up --build
+```
+
+**For detailed deployment instructions and environment configuration, see the [mcp-server README](./mcp-server/README.md).**
 
 ## Contributing
 

@@ -13,6 +13,7 @@ export async function seed(knex: Knex): Promise<void> {
   const employees = [
     {
       id: '550e8400-e29b-41d4-a716-446655440001',
+      code: 'E001',
       name: 'Leia Organa',
       job_title: 'Senior Project Manager',
       email: 'leia.organa@rebellion.com',
@@ -21,6 +22,7 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       id: '550e8400-e29b-41d4-a716-446655440002',
+      code: 'E002',
       name: 'Luke Skywalker',
       job_title: 'Lead Developer',
       email: 'luke.skywalker@jedi.com',
@@ -29,6 +31,7 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       id: '550e8400-e29b-41d4-a716-446655440003',
+      code: 'E003',
       name: 'Padmé Amidala',
       job_title: 'UI/UX Designer',
       email: 'padme.amidala@naboo.gov',
@@ -37,6 +40,7 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       id: '550e8400-e29b-41d4-a716-446655440004',
+      code: 'E004',
       name: 'Han Solo',
       job_title: 'DevOps Engineer',
       email: 'han.solo@millennium-falcon.com',
@@ -45,6 +49,7 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       id: '550e8400-e29b-41d4-a716-446655440005',
+      code: 'E005',
       name: 'Rey Skywalker',
       job_title: 'Quality Assurance Lead',
       email: 'rey.skywalker@resistance.com',
@@ -58,6 +63,7 @@ export async function seed(knex: Knex): Promise<void> {
   const programs = [
     {
       id: '660e8400-e29b-41d4-a716-446655440001',
+      code: 'P001',
       name: 'Digital Transformation Initiative',
       description: 'A comprehensive program to modernize our digital infrastructure and processes.',
       manager_id: '550e8400-e29b-41d4-a716-446655440001', // Leia Organa
@@ -66,6 +72,7 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       id: '660e8400-e29b-41d4-a716-446655440002',
+      code: 'P002',
       name: 'Customer Experience Enhancement',
       description: 'Program focused on improving customer touchpoints and satisfaction.',
       manager_id: '550e8400-e29b-41d4-a716-446655440005', // Rey Skywalker
@@ -79,6 +86,7 @@ export async function seed(knex: Knex): Promise<void> {
   const contracts = [
     {
       id: '770e8400-e29b-41d4-a716-446655440001',
+      code: 'C001',
       name: 'Core Platform Upgrade',
       description: 'Upgrade the main application platform to modern technologies.',
       program_id: '660e8400-e29b-41d4-a716-446655440001',
@@ -87,6 +95,7 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       id: '770e8400-e29b-41d4-a716-446655440002',
+      code: 'C002',
       name: 'Mobile App Development',
       description: 'Develop a new mobile application for customer engagement.',
       program_id: '660e8400-e29b-41d4-a716-446655440001',
@@ -95,6 +104,7 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       id: '770e8400-e29b-41d4-a716-446655440003',
+      code: 'C003',
       name: 'Customer Portal Redesign',
       description: 'Complete redesign of the customer portal interface.',
       program_id: '660e8400-e29b-41d4-a716-446655440002',
@@ -108,48 +118,56 @@ export async function seed(knex: Knex): Promise<void> {
   const tags = [
     {
       id: '880e8400-e29b-41d4-a716-446655440001',
+      code: 'TAG001',
       name: 'Frontend',
       created_at: new Date(),
       updated_at: new Date(),
     },
     {
       id: '880e8400-e29b-41d4-a716-446655440002',
+      code: 'TAG002',
       name: 'Backend',
       created_at: new Date(),
       updated_at: new Date(),
     },
     {
       id: '880e8400-e29b-41d4-a716-446655440003',
+      code: 'TAG003',
       name: 'Database',
       created_at: new Date(),
       updated_at: new Date(),
     },
     {
       id: '880e8400-e29b-41d4-a716-446655440004',
+      code: 'TAG004',
       name: 'API',
       created_at: new Date(),
       updated_at: new Date(),
     },
     {
       id: '880e8400-e29b-41d4-a716-446655440005',
+      code: 'TAG005',
       name: 'Testing',
       created_at: new Date(),
       updated_at: new Date(),
     },
     {
       id: '880e8400-e29b-41d4-a716-446655440006',
+      code: 'TAG006',
       name: 'DevOps',
       created_at: new Date(),
       updated_at: new Date(),
     },
     {
       id: '880e8400-e29b-41d4-a716-446655440007',
+      code: 'TAG007',
       name: 'Security',
       created_at: new Date(),
       updated_at: new Date(),
     },
     {
       id: '880e8400-e29b-41d4-a716-446655440008',
+      code: 'TAG008',
       name: 'Performance',
       created_at: new Date(),
       updated_at: new Date(),
@@ -161,14 +179,16 @@ export async function seed(knex: Knex): Promise<void> {
   const tasks = [
     {
       id: '990e8400-e29b-41d4-a716-446655440001',
-      name: 'Setup development environment',
-      completion_value: 10,
+      code: 'T001',
+      name: 'Design payment processing system',
+      completion_value: 4,
       contract_id: '770e8400-e29b-41d4-a716-446655440001',
       created_at: new Date(),
       updated_at: new Date(),
     },
     {
       id: '990e8400-e29b-41d4-a716-446655440002',
+      code: 'T002',
       name: 'Design database schema',
       completion_value: 8,
       contract_id: '770e8400-e29b-41d4-a716-446655440001',
@@ -177,6 +197,7 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       id: '990e8400-e29b-41d4-a716-446655440003',
+      code: 'T003',
       name: 'Implement user authentication',
       completion_value: 5,
       contract_id: '770e8400-e29b-41d4-a716-446655440001',
@@ -185,6 +206,7 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       id: '990e8400-e29b-41d4-a716-446655440004',
+      code: 'T004',
       name: 'Create mobile app wireframes',
       completion_value: 7,
       contract_id: '770e8400-e29b-41d4-a716-446655440002',
@@ -193,6 +215,7 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       id: '990e8400-e29b-41d4-a716-446655440005',
+      code: 'T005',
       name: 'Develop React Native components',
       completion_value: 3,
       contract_id: '770e8400-e29b-41d4-a716-446655440002',
@@ -201,6 +224,7 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       id: '990e8400-e29b-41d4-a716-446655440006',
+      code: 'T006',
       name: 'Conduct user research',
       completion_value: 10,
       contract_id: '770e8400-e29b-41d4-a716-446655440003',
@@ -209,6 +233,7 @@ export async function seed(knex: Knex): Promise<void> {
     },
     {
       id: '990e8400-e29b-41d4-a716-446655440007',
+      code: 'T007',
       name: 'Design new portal layout',
       completion_value: 6,
       contract_id: '770e8400-e29b-41d4-a716-446655440003',

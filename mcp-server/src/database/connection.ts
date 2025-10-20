@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 const dbConfig: Knex.Config = {
   client: 'sqlite3',
   connection: {
-    filename: path.join(__dirname, '..', '..', 'database', 'contract_manager.sqlite3'),
+    filename: path.join(__dirname, 'contract_manager.sqlite3'),
   },
   useNullAsDefault: true,
   migrations: {

@@ -1,6 +1,7 @@
 // Core entity interfaces
 export interface Program {
   id: string;
+  code: string;
   name: string;
   description: string;
   manager_id: string;
@@ -10,6 +11,7 @@ export interface Program {
 
 export interface Contract {
   id: string;
+  code: string;
   name: string;
   description: string;
   program_id: string;
@@ -19,6 +21,7 @@ export interface Contract {
 
 export interface Task {
   id: string;
+  code: string;
   name: string;
   completion_value: number; // 0-10
   contract_id: string;
@@ -28,6 +31,7 @@ export interface Task {
 
 export interface Employee {
   id: string;
+  code: string;
   name: string;
   job_title: string;
   email: string;
@@ -37,6 +41,7 @@ export interface Employee {
 
 export interface Tag {
   id: string;
+  code: string;
   name: string;
   created_at: Date;
   updated_at: Date;
@@ -59,7 +64,7 @@ export interface TaskTag {
   updated_at: Date;
 }
 
-// Input types for creating entities (without id and timestamps)
+// Input types for creating entities (without id, code and timestamps)
 export interface CreateProgram {
   name: string;
   description: string;
@@ -101,6 +106,7 @@ export interface CreateTaskTag {
 // Update types (all fields optional except id)
 export interface UpdateProgram {
   id: string;
+  code?: string;
   name?: string;
   description?: string;
   manager_id?: string;
@@ -108,6 +114,7 @@ export interface UpdateProgram {
 
 export interface UpdateContract {
   id: string;
+  code?: string;
   name?: string;
   description?: string;
   program_id?: string;
@@ -115,6 +122,7 @@ export interface UpdateContract {
 
 export interface UpdateTask {
   id: string;
+  code?: string;
   name?: string;
   completion_value?: number;
   contract_id?: string;
@@ -122,6 +130,7 @@ export interface UpdateTask {
 
 export interface UpdateEmployee {
   id: string;
+  code?: string;
   name?: string;
   job_title?: string;
   email?: string;
@@ -129,6 +138,7 @@ export interface UpdateEmployee {
 
 export interface UpdateTag {
   id: string;
+  code?: string;
   name?: string;
 }
 
@@ -153,6 +163,15 @@ export interface TaskWithDetails extends Task {
   tags: Tag[];
 }
 
+// Code counter interface
+export interface CodeCounter {
+  id: string;
+  entity_type: string;
+  current_count: number;
+  created_at: Date;
+  updated_at: Date;
+}
+
 // Knex table definitions for TypeScript support
 export interface DatabaseTables {
   programs: Program;
@@ -162,4 +181,5 @@ export interface DatabaseTables {
   tags: Tag;
   task_assignments: TaskAssignment;
   task_tags: TaskTag;
+  code_counters: CodeCounter;
 }

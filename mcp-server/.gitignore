@@ -119,3 +119,9 @@ ehthumbs.db
 # Build output
 dist/
 build/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+src/database/*.sqlite3

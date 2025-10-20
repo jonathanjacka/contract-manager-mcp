@@ -10,7 +10,7 @@ const __dirname = path.dirname(__filename);
 const dbConfig: Knex.Config = {
   client: 'sqlite3',
   connection: {
-    filename: path.join(__dirname, '..', '..', 'database', 'contract_manager.sqlite3'),
+    filename: path.join(__dirname, 'contract_manager.sqlite3'),
   },
   useNullAsDefault: true,
   migrations: {
@@ -28,12 +28,9 @@ const dbConfig: Knex.Config = {
     },
   },
 };
-// Create the Knex instance
+
 export const db = knex(dbConfig);
 
-/**
- * Initialize the database by running migrations and seeds
- */
 export async function initializeDatabase(): Promise<void> {
   try {
     logger.info('🔄 Initializing database...');
@@ -43,7 +40,7 @@ export async function initializeDatabase(): Promise<void> {
     await db.migrate.latest();
     logger.success('✅ Database migrations completed');
 
-    // Run seeds for fresh data on every restart
+    // Run seeds on every restart
     logger.info('🌱 Running database seeds...');
     await db.seed.run();
     logger.success('✅ Database seeds completed');
@@ -55,9 +52,6 @@ export async function initializeDatabase(): Promise<void> {
   }
 }
 
-/**
- * Close the database connection
- */
 export async function closeDatabase(): Promise<void> {
   try {
     await db.destroy();
@@ -68,22 +62,16 @@ export async function closeDatabase(): Promise<void> {
   }
 }
 
-/**
- * Reset the database by rolling back all migrations and re-running them with seeds
- */
 export async function resetDatabase(): Promise<void> {
   try {
     logger.info('🔄 Resetting database...');
 
-    // Rollback all migrations
     await db.migrate.rollback(undefined, true);
     logger.info('📋 Rolled back all migrations');
 
-    // Re-run migrations
     await db.migrate.latest();
     logger.info('📋 Re-ran migrations');
 
-    // Run seeds
     await db.seed.run();
     logger.info('🌱 Re-ran seeds');
 

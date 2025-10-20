@@ -1,7 +1,3 @@
-/**
- * Database service layer providing simple CRUD operations for all entities
- */
-
 import { db } from '../database/connection.js';
 import type {
   Program,
@@ -20,10 +16,6 @@ import type {
   ContractWithProgram,
   TaskWithDetails,
 } from '../types/database.js';
-
-// ============================================================================
-// EMPLOYEE SERVICES
-// ============================================================================
 
 export const employeeService = {
   async getAll(): Promise<Employee[]> {
@@ -53,10 +45,6 @@ export const employeeService = {
   },
 };
 
-// ============================================================================
-// PROGRAM SERVICES
-// ============================================================================
-
 export const programService = {
   async getAll(): Promise<Program[]> {
     return db('programs').select('*').orderBy('name');
@@ -67,14 +55,18 @@ export const programService = {
       .join('employees', 'programs.manager_id', 'employees.id')
       .select(
         'programs.*',
+        'employees.code as manager_code',
         'employees.name as manager_name',
         'employees.job_title as manager_job_title',
-        'employees.email as manager_email'
+        'employees.email as manager_email',
+        'employees.created_at as manager_created_at',
+        'employees.updated_at as manager_updated_at'
       )
       .orderBy('programs.name')
       .then(rows =>
         rows.map(row => ({
           id: row.id,
+          code: row.code,
           name: row.name,
           description: row.description,
           manager_id: row.manager_id,
@@ -82,11 +74,12 @@ export const programService = {
           updated_at: row.updated_at,
           manager: {
             id: row.manager_id,
+            code: row.manager_code,
             name: row.manager_name,
             job_title: row.manager_job_title,
             email: row.manager_email,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
+            created_at: row.manager_created_at,
+            updated_at: row.manager_updated_at,
           },
         }))
       );
@@ -101,9 +94,12 @@ export const programService = {
       .join('employees', 'programs.manager_id', 'employees.id')
       .select(
         'programs.*',
+        'employees.code as manager_code',
         'employees.name as manager_name',
         'employees.job_title as manager_job_title',
-        'employees.email as manager_email'
+        'employees.email as manager_email',
+        'employees.created_at as manager_created_at',
+        'employees.updated_at as manager_updated_at'
       )
       .where('programs.id', id)
       .first();
@@ -112,6 +108,7 @@ export const programService = {
 
     return {
       id: row.id,
+      code: row.code,
       name: row.name,
       description: row.description,
       manager_id: row.manager_id,
@@ -119,11 +116,12 @@ export const programService = {
       updated_at: row.updated_at,
       manager: {
         id: row.manager_id,
+        code: row.manager_code,
         name: row.manager_name,
         job_title: row.manager_job_title,
         email: row.manager_email,
-        created_at: row.created_at,
-        updated_at: row.updated_at,
+        created_at: row.manager_created_at,
+        updated_at: row.manager_updated_at,
       },
     };
   },
@@ -147,10 +145,6 @@ export const programService = {
   },
 };
 
-// ============================================================================
-// CONTRACT SERVICES
-// ============================================================================
-
 export const contractService = {
   async getAll(): Promise<Contract[]> {
     return db('contracts').select('*').orderBy('name');
@@ -161,14 +155,18 @@ export const contractService = {
       .join('programs', 'contracts.program_id', 'programs.id')
       .select(
         'contracts.*',
+        'programs.code as program_code',
         'programs.name as program_name',
         'programs.description as program_description',
-        'programs.manager_id as program_manager_id'
+        'programs.manager_id as program_manager_id',
+        'programs.created_at as program_created_at',
+        'programs.updated_at as program_updated_at'
       )
       .orderBy('contracts.name')
       .then(rows =>
         rows.map(row => ({
           id: row.id,
+          code: row.code,
           name: row.name,
           description: row.description,
           program_id: row.program_id,
@@ -176,11 +174,12 @@ export const contractService = {
           updated_at: row.updated_at,
           program: {
             id: row.program_id,
+            code: row.program_code,
             name: row.program_name,
             description: row.program_description,
             manager_id: row.program_manager_id,
-            created_at: row.created_at,
-            updated_at: row.updated_at,
+            created_at: row.program_created_at,
+            updated_at: row.program_updated_at,
           },
         }))
       );
@@ -212,10 +211,6 @@ export const contractService = {
     return deletedCount > 0;
   },
 };
-
-// ============================================================================
-// TAG SERVICES
-// ============================================================================
 
 export const tagService = {
   async getAll(): Promise<Tag[]> {
@@ -249,10 +244,6 @@ export const tagService = {
   },
 };
 
-// ============================================================================
-// TASK SERVICES
-// ============================================================================
-
 export const taskService = {
   async getAll(): Promise<Task[]> {
     return db('tasks').select('*').orderBy('name');
@@ -264,16 +255,21 @@ export const taskService = {
       .join('programs', 'contracts.program_id', 'programs.id')
       .select(
         'tasks.*',
+        'contracts.code as contract_code',
         'contracts.name as contract_name',
         'contracts.description as contract_description',
+        'contracts.created_at as contract_created_at',
+        'contracts.updated_at as contract_updated_at',
         'programs.id as program_id',
+        'programs.code as program_code',
         'programs.name as program_name',
         'programs.description as program_description',
-        'programs.manager_id as program_manager_id'
+        'programs.manager_id as program_manager_id',
+        'programs.created_at as program_created_at',
+        'programs.updated_at as program_updated_at'
       )
       .orderBy('tasks.name');
 
-    // Get employees and tags for each task
     const tasksWithDetails: TaskWithDetails[] = [];
     for (const task of tasks) {
       const employees = await db('task_assignments')
@@ -288,6 +284,7 @@ export const taskService = {
 
       tasksWithDetails.push({
         id: task.id,
+        code: task.code,
         name: task.name,
         completion_value: task.completion_value,
         contract_id: task.contract_id,
@@ -295,18 +292,20 @@ export const taskService = {
         updated_at: task.updated_at,
         contract: {
           id: task.contract_id,
+          code: task.contract_code,
           name: task.contract_name,
           description: task.contract_description,
           program_id: task.program_id,
-          created_at: task.created_at,
-          updated_at: task.updated_at,
+          created_at: task.contract_created_at,
+          updated_at: task.contract_updated_at,
           program: {
             id: task.program_id,
+            code: task.program_code,
             name: task.program_name,
             description: task.program_description,
             manager_id: task.program_manager_id,
-            created_at: task.created_at,
-            updated_at: task.updated_at,
+            created_at: task.program_created_at,
+            updated_at: task.program_updated_at,
           },
         },
         employees,
@@ -357,7 +356,6 @@ export const taskService = {
     return deletedCount > 0;
   },
 
-  // Task assignment methods
   async assignEmployee(taskId: string, employeeId: string): Promise<TaskAssignment> {
     const [assignment] = await db('task_assignments')
       .insert({ task_id: taskId, employee_id: employeeId })
@@ -379,7 +377,6 @@ export const taskService = {
       .select('employees.*');
   },
 
-  // Task tag methods
   async addTag(taskId: string, tagId: string): Promise<TaskTag> {
     const [taskTag] = await db('task_tags')
       .insert({ task_id: taskId, tag_id: tagId })

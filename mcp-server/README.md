@@ -46,6 +46,18 @@ This service is part of the larger Contract Manager ecosystem. See the [root REA
 - ✅ **Service Layer**: Type-safe CRUD operations and relationship queries
 - ✅ **Auto-initialization**: Database setup and seeding on every server startup
 
+### MCP Tools Implementation (v1.3.0)
+
+- ✅ **Friendly Code System**: Human-readable codes (E001, P001, C001, T001, TAG001) for all entities
+- ✅ **Database Triggers**: Auto-generation of friendly codes with sequence counters
+- ✅ **List Tools**: Complete set of list tools for all entities with resource links
+- ✅ **Individual Get Tools**: Get specific entities by their friendly codes
+- ✅ **Resource Links**: Interactive resource links for easy navigation between entities
+- ✅ **Embedded Resources**: Full JSON data embedding for detailed entity information
+- ✅ **Zod Schema Validation**: Type-safe input validation for all MCP tool parameters
+- ✅ **Error Handling**: Proper error assertions with meaningful messages
+- ✅ **Clean Architecture**: Separated tools, schemas, middleware, and routes
+
 ## Project Structure
 
 ```
@@ -53,6 +65,7 @@ mcp-server/
 ├── src/                    # TypeScript source code
 │   ├── index.ts           # Main MCP server with HTTP transport
 │   ├── constants.ts       # Centralized server configuration
+│   ├── tools.ts           # MCP tools implementation
 │   ├── types/             # TypeScript type definitions
 │   │   └── database.ts    # Database entity interfaces
 │   ├── database/          # Database configuration and management
@@ -63,10 +76,13 @@ mcp-server/
 │   │       └── 001_initial_data.ts
 │   ├── services/          # Business logic and data access
 │   │   └── database.ts    # Database service layer
+│   ├── schemas/           # Input validation schemas
+│   │   └── schema.ts      # Zod schemas for MCP tools
+│   ├── middleware/        # Express middleware
+│   ├── routes/            # Express route handlers
 │   └── utils/             # Logging and utility functions
-│       └── logger.ts      # Colored logging with chalk
-├── database/               # SQLite database files
-│   └── contract_manager.sqlite3  # Main database file (generated)
+│       ├── logger.ts      # Colored logging with chalk
+│       └── assert.ts      # Error assertion utility
 ├── public/                 # Static assets
 ├── dist/                   # Compiled JavaScript (generated)
 ├── node_modules/           # Dependencies (generated)
@@ -215,8 +231,10 @@ The server uses a SQLite database with a comprehensive contract management schem
 ### Database Features
 
 - **Auto-initialization**: Database is created and seeded on every server startup
+- **Friendly Codes**: Human-readable codes (E001, P001, C001, etc.) for easy identification
 - **UUID Primary Keys**: All entities use UUIDs for unique identification
 - **Foreign Key Constraints**: Proper referential integrity with cascade deletes
+- **Database Triggers**: Auto-generation of friendly codes for new records
 - **Type Safety**: Full TypeScript interfaces for all entities and operations
 - **Service Layer**: Clean CRUD operations via `services/database.ts`
 
@@ -224,11 +242,13 @@ The server uses a SQLite database with a comprehensive contract management schem
 
 The database includes realistic sample data with:
 
-- 5 employees with various roles (Project Manager, Developer, Designer, DevOps, QA)
-- 2 programs representing different business initiatives
-- 3 contracts under active management
-- 7 tasks with varying completion levels
-- 8 tags for task categorization
+- **5 employees** with friendly codes E001-E005 (Leia, Luke, Padmé, Han, Rey)
+- **2 programs** with codes P001-P002 representing different business initiatives
+- **3 contracts** with codes C001-C003 under active management
+- **7 tasks** with codes T001-T007 and varying completion levels
+- **8 tags** with codes TAG001-TAG008 for task categorization
+
+All entities use friendly codes for easy reference in MCP tools.
 
 ## API Endpoints
 
@@ -243,11 +263,114 @@ The database includes realistic sample data with:
 
 ### Capabilities
 
-Current server capabilities:
+Current MCP server capabilities:
 
-- **Tools**: 0 (minimal server setup)
-- **Resources**: 0 (ready for expansion)
-- **Prompts**: 0 (ready for expansion)
+**List Tools (5):**
+
+- `list_employees` - List all employees with their roles and departments
+- `list_programs` - List all programs with descriptions
+- `list_contracts` - List all contracts with status information
+- `list_tasks` - List all tasks with completion levels
+- `list_tags` - List all tags for categorization
+
+**Individual Get Tools (5):**
+
+- `get_employee` - Get specific employee by code (e.g., E001)
+- `get_program` - Get specific program by code (e.g., P001)
+- `get_contract` - Get specific contract by code (e.g., C001)
+- `get_task` - Get specific task by code (e.g., T001)
+- `get_tag` - Get specific tag by code (e.g., TAG001)
+
+**Features:**
+
+- Human-readable friendly codes for all entities
+- Interactive resource links for navigation
+- Full JSON embedding for detailed information
+- Type-safe input validation with Zod schemas
+- Comprehensive error handling
+
+## MCP Tool Examples
+
+### List Tool Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "list_employees"
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Found 5 employees."
+      },
+      {
+        "type": "resource_link",
+        "uri": "contract-manager://employees/E001",
+        "name": "E001: Leia Organa",
+        "description": "Employee: \"Leia Organa\" - Senior Project Manager",
+        "mimeType": "application/json"
+      },
+      {
+        "type": "resource_link",
+        "uri": "contract-manager://employees/E002",
+        "name": "E002: Luke Skywalker",
+        "description": "Employee: \"Luke Skywalker\" - Lead Developer",
+        "mimeType": "application/json"
+      }
+    ]
+  }
+}
+```
+
+### Get Tool Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "get_employee",
+    "arguments": {
+      "code": "E001"
+    }
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "content": [
+      {
+        "type": "resource",
+        "resource": {
+          "uri": "contract-manager://employees/E001",
+          "mimeType": "application/json",
+          "text": "{\"id\":\"550e8400-e29b-41d4-a716-446655440001\",\"code\":\"E001\",\"name\":\"Leia Organa\",\"job_title\":\"Senior Project Manager\",\"email\":\"leia.organa@rebellion.com\",\"created_at\":\"2025-01-20T...\",\"updated_at\":\"2025-01-20T...\"}"
+        }
+      }
+    ]
+  }
+}
+```
 
 ## MCP Inspector Setup
 

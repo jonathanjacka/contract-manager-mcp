@@ -50,6 +50,17 @@ This ecosystem consists of multiple services that work together:
 - ✅ **Service Layer**: Type-safe CRUD operations and relationship queries
 - ✅ **Rich Sample Data**: Realistic employee and project data for testing
 
+### MCP Tools Implementation (v1.3.0)
+
+- ✅ **Friendly Code System**: Human-readable codes (E001, P001, C001, T001, TAG001) for all entities
+- ✅ **Database Triggers**: Auto-generation of friendly codes for new records
+- ✅ **List Tools**: Complete set of list tools for all entities (employees, programs, contracts, tasks, tags)
+- ✅ **Individual Get Tools**: Get specific entities by their friendly codes
+- ✅ **Resource Links**: Interactive resource links for easy navigation between entities
+- ✅ **Embedded Resources**: Full JSON data embedding for detailed entity information
+- ✅ **Zod Schema Validation**: Type-safe input validation for all MCP tool parameters
+- ✅ **Error Handling**: Proper error assertions with meaningful messages
+
 ## Project Structure
 
 ```
@@ -61,11 +72,14 @@ contract-manager/
     ├── src/              # TypeScript source code
     │   ├── index.ts      # Main MCP server with HTTP transport
     │   ├── constants.ts  # Centralized configuration
+    │   ├── tools.ts      # MCP tools implementation
     │   ├── types/        # TypeScript type definitions
     │   ├── database/     # Database configuration and migrations
     │   ├── services/     # Business logic and data access
+    │   ├── schemas/      # Zod input validation schemas
+    │   ├── middleware/   # Express middleware
+    │   ├── routes/       # Express route handlers
     │   └── utils/        # Logging and utility functions
-    ├── database/         # SQLite database files
     ├── dist/             # Compiled JavaScript (generated)
     ├── package.json      # Dependencies and MCP-focused scripts
     ├── tsconfig.json     # TypeScript configuration
@@ -196,9 +210,31 @@ To customize your environment:
 The MCP server includes a complete contract management database with:
 
 - **Programs**, **Contracts**, **Tasks**, **Employees**, and **Tags**
+- **Friendly codes** (E001, P001, C001, T001, TAG001) for human-readable entity identification
 - **UUID primary keys** and proper foreign key relationships
 - **Automatic seeding** with sample data on server startup
 - **Type-safe service layer** for all data operations
+- **Database triggers** for auto-generating friendly codes on new records
+
+### MCP Tools
+
+The server provides comprehensive MCP tools for contract management:
+
+**List Tools:**
+
+- `list_employees` - List all employees with their roles and departments
+- `list_programs` - List all programs with descriptions
+- `list_contracts` - List all contracts with status and values
+- `list_tasks` - List all tasks with completion status
+- `list_tags` - List all tags for categorization
+
+**Individual Get Tools:**
+
+- `get_employee` - Get specific employee by code (e.g., E001)
+- `get_program` - Get specific program by code (e.g., P001)
+- `get_contract` - Get specific contract by code (e.g., C001)
+- `get_task` - Get specific task by code (e.g., T001)
+- `get_tag` - Get specific tag by code (e.g., TAG001)
 
 ### Future Services
 

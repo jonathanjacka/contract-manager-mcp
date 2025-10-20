@@ -8,6 +8,14 @@ import {
 } from './services/database.js';
 import type { Employee, Program, Contract, Task, Tag } from './types/database.js';
 import type { ContractManagerMCP } from './index.js';
+import { assert } from './utils/assert.js';
+import {
+  employeeCodeSchema,
+  programCodeSchema,
+  contractCodeSchema,
+  taskCodeSchema,
+  tagCodeSchema,
+} from './schemas/schema.js';
 
 export async function initializeTools(agent: ContractManagerMCP) {
   agent.server.registerTool(
@@ -84,6 +92,87 @@ export async function initializeTools(agent: ContractManagerMCP) {
       };
     }
   );
+
+  // Individual get tools
+  agent.server.registerTool(
+    'get_employee',
+    {
+      title: 'Get Employee',
+      description: 'Get an employee by their code',
+      inputSchema: employeeCodeSchema,
+    },
+    async ({ code }) => {
+      const employee = await employeeService.getByCode(code);
+      assert(employee, `Employee with code "${code}" not found`);
+      return {
+        content: [createEmployeeEmbeddedResource(employee)],
+      };
+    }
+  );
+
+  agent.server.registerTool(
+    'get_program',
+    {
+      title: 'Get Program',
+      description: 'Get a program by its code',
+      inputSchema: programCodeSchema,
+    },
+    async ({ code }) => {
+      const program = await programService.getByCode(code);
+      assert(program, `Program with code "${code}" not found`);
+      return {
+        content: [createProgramEmbeddedResource(program)],
+      };
+    }
+  );
+
+  agent.server.registerTool(
+    'get_contract',
+    {
+      title: 'Get Contract',
+      description: 'Get a contract by its code',
+      inputSchema: contractCodeSchema,
+    },
+    async ({ code }) => {
+      const contract = await contractService.getByCode(code);
+      assert(contract, `Contract with code "${code}" not found`);
+      return {
+        content: [createContractEmbeddedResource(contract)],
+      };
+    }
+  );
+
+  agent.server.registerTool(
+    'get_task',
+    {
+      title: 'Get Task',
+      description: 'Get a task by its code',
+      inputSchema: taskCodeSchema,
+    },
+    async ({ code }) => {
+      const task = await taskService.getByCode(code);
+      assert(task, `Task with code "${code}" not found`);
+      return {
+        content: [createTaskEmbeddedResource(task)],
+      };
+    }
+  );
+
+  agent.server.registerTool(
+    'get_tag',
+    {
+      title: 'Get Tag',
+      description: 'Get a tag by its code',
+      inputSchema: tagCodeSchema,
+    },
+    async ({ code }) => {
+      const tag = await tagService.getByCode(code);
+      assert(tag, `Tag with code "${code}" not found`);
+      return {
+        content: [createTagEmbeddedResource(tag)],
+      };
+    }
+  );
 }
 
 function createText(text: unknown): CallToolResult['content'][number] {
@@ -149,4 +238,61 @@ function createTaskResourceLink(task: Task): ResourceLinkContent {
 
 function createTagResourceLink(tag: Tag): ResourceLinkContent {
   return createResourceLink('tags', tag.code, tag.name, `Tag: "${tag.name}"`);
+}
+
+type ResourceContent = CallToolResult['content'][number];
+
+function createEmployeeEmbeddedResource(employee: Employee): ResourceContent {
+  return {
+    type: 'resource',
+    resource: {
+      uri: `contract-manager://employees/${employee.code}`,
+      mimeType: 'application/json',
+      text: JSON.stringify(employee),
+    },
+  };
+}
+
+function createProgramEmbeddedResource(program: Program): ResourceContent {
+  return {
+    type: 'resource',
+    resource: {
+      uri: `contract-manager://programs/${program.code}`,
+      mimeType: 'application/json',
+      text: JSON.stringify(program),
+    },
+  };
+}
+
+function createContractEmbeddedResource(contract: Contract): ResourceContent {
+  return {
+    type: 'resource',
+    resource: {
+      uri: `contract-manager://contracts/${contract.code}`,
+      mimeType: 'application/json',
+      text: JSON.stringify(contract),
+    },
+  };
+}
+
+function createTaskEmbeddedResource(task: Task): ResourceContent {
+  return {
+    type: 'resource',
+    resource: {
+      uri: `contract-manager://tasks/${task.code}`,
+      mimeType: 'application/json',
+      text: JSON.stringify(task),
+    },
+  };
+}
+
+function createTagEmbeddedResource(tag: Tag): ResourceContent {
+  return {
+    type: 'resource',
+    resource: {
+      uri: `contract-manager://tags/${tag.code}`,
+      mimeType: 'application/json',
+      text: JSON.stringify(tag),
+    },
+  };
 }

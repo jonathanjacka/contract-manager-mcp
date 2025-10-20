@@ -26,6 +26,10 @@ export const employeeService = {
     return db('employees').where({ id }).first();
   },
 
+  async getByCode(code: string): Promise<Employee | undefined> {
+    return db('employees').where({ code }).first();
+  },
+
   async create(data: CreateEmployee): Promise<Employee> {
     const [employee] = await db('employees').insert(data).returning('*');
     return employee;
@@ -87,6 +91,10 @@ export const programService = {
 
   async getById(id: string): Promise<Program | undefined> {
     return db('programs').where({ id }).first();
+  },
+
+  async getByCode(code: string): Promise<Program | undefined> {
+    return db('programs').where({ code }).first();
   },
 
   async getByIdWithManager(id: string): Promise<ProgramWithManager | undefined> {
@@ -189,6 +197,10 @@ export const contractService = {
     return db('contracts').where({ id }).first();
   },
 
+  async getByCode(code: string): Promise<Contract | undefined> {
+    return db('contracts').where({ code }).first();
+  },
+
   async getByProgramId(programId: string): Promise<Contract[]> {
     return db('contracts').where({ program_id: programId }).orderBy('name');
   },
@@ -219,6 +231,10 @@ export const tagService = {
 
   async getById(id: string): Promise<Tag | undefined> {
     return db('tags').where({ id }).first();
+  },
+
+  async getByCode(code: string): Promise<Tag | undefined> {
+    return db('tags').where({ code }).first();
   },
 
   async getByName(name: string): Promise<Tag | undefined> {
@@ -317,6 +333,10 @@ export const taskService = {
 
   async getById(id: string): Promise<Task | undefined> {
     return db('tasks').where({ id }).first();
+  },
+
+  async getByCode(code: string): Promise<Task | undefined> {
+    return db('tasks').where({ code }).first();
   },
 
   async getByContractId(contractId: string): Promise<Task[]> {

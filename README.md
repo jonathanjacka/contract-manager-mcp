@@ -72,6 +72,17 @@ This ecosystem consists of multiple services that work together:
 - ✅ **Service Layer**: Dedicated service files for each entity with comprehensive operations
 - ✅ **Code-Based Operations**: All CRUD operations use friendly codes instead of UUIDs
 
+### MCP Resources Implementation (v1.5.0)
+
+- ✅ **MCP Resources Capability**: Full implementation of MCP Resources specification
+- ✅ **List Resources**: 5 list resources providing bulk access to all entity types (employees, programs, contracts, tasks, tags)
+- ✅ **Template Resources**: 5 parameterized template resources for individual entity access with friendly code completion
+- ✅ **Resource Discovery**: Complete resource discovery with `list: undefined` to prevent resource bloat
+- ✅ **Intelligent Completion**: Code completion for all entity friendly codes (E001, P001, C001, T001, TAG001)
+- ✅ **Consistent URI Patterns**: Standardized `contract-manager://` scheme for all resources
+- ✅ **Modular Resource Architecture**: Organized resources by entity type in separate files
+- ✅ **Error Handling**: Consistent error handling using project's assert utility
+
 ## Project Structure
 
 ```
@@ -99,6 +110,13 @@ contract-manager/
     │   │   ├── programService.ts  # Program data operations
     │   │   ├── contractService.ts # Contract data operations
     │   │   └── database.ts        # Legacy service exports
+    │   ├── resources/    # MCP Resources for data access
+    │   │   ├── index.ts           # Resource registration
+    │   │   ├── employeeResources.ts # Employee list/template resources
+    │   │   ├── taskResources.ts     # Task list/template resources
+    │   │   ├── tagResources.ts      # Tag list/template resources
+    │   │   ├── programResources.ts  # Program list/template resources
+    │   │   └── contractResources.ts # Contract list/template resources
     │   ├── types/        # TypeScript type definitions
     │   ├── database/     # Database configuration and migrations
     │   ├── schemas/      # Zod input validation schemas
@@ -284,6 +302,34 @@ The server provides comprehensive MCP tools for contract management:
 - `delete_tag` - Remove tags (automatically cleans up relationships)
 - `add_tag_to_task` - Apply tags to tasks for categorization
 - `remove_tag_from_task` - Remove tag assignments from tasks
+
+### MCP Resources
+
+The server provides comprehensive MCP Resources for efficient data access:
+
+**List Resources (5 total):**
+
+- `employees` - All employees currently in the database (`contract-manager://employees`)
+- `programs` - All programs currently in the database (`contract-manager://programs`)
+- `contracts` - All contracts currently in the database (`contract-manager://contracts`)
+- `tasks` - All tasks currently in the database (`contract-manager://tasks`)
+- `tags` - All tags currently in the database (`contract-manager://tags`)
+
+**Template Resources (5 total):**
+
+- `employee` - Individual employee by code (`contract-manager://employees/{code}`, e.g., `contract-manager://employees/E001`)
+- `program` - Individual program by code (`contract-manager://programs/{code}`, e.g., `contract-manager://programs/P001`)
+- `contract` - Individual contract by code (`contract-manager://contracts/{code}`, e.g., `contract-manager://contracts/C001`)
+- `task` - Individual task by code (`contract-manager://tasks/{code}`, e.g., `contract-manager://tasks/T001`)
+- `tag` - Individual tag by code (`contract-manager://tags/{code}`, e.g., `contract-manager://tags/TAG001`)
+
+**Resource Features:**
+
+- **Intelligent Completion**: All template resources provide code completion for friendly codes
+- **Resource Discovery**: List resources enable bulk access to entity data
+- **Clean Architecture**: Template resources use `list: undefined` to prevent resource bloat
+- **Consistent URI Patterns**: Standardized `contract-manager://` scheme across all resources
+- **Type Safety**: Full TypeScript integration with existing service layer
 
 ### Future Services
 

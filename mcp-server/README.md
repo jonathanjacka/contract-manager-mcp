@@ -70,6 +70,18 @@ This service is part of the larger Contract Manager ecosystem. See the [root REA
 - ✅ **Code-Based Operations**: All CRUD operations use friendly codes instead of UUIDs
 - ✅ **Cleanup Operations**: Delete operations properly handle relationship cleanup
 
+### MCP Resources Implementation (v1.5.0)
+
+- ✅ **MCP Resources Capability**: Full implementation of MCP Resources specification
+- ✅ **List Resources**: 5 list resources providing bulk access to all entity types
+- ✅ **Template Resources**: 5 parameterized template resources for individual entity access
+- ✅ **Intelligent Completion**: Code completion for all entity friendly codes
+- ✅ **Resource Discovery**: Complete resource discovery with clean architecture
+- ✅ **URI Standardization**: Consistent `contract-manager://` scheme for all resources
+- ✅ **Modular Resource Files**: Organized resources by entity type with dedicated files
+- ✅ **Error Handling**: Consistent error handling using project's assert utility
+- ✅ **Resource Template Configuration**: Proper `list: undefined` to prevent resource bloat
+
 ## Project Structure
 
 ```
@@ -93,6 +105,13 @@ mcp-server/
 │   │   ├── programService.ts  # Program data operations
 │   │   ├── contractService.ts # Contract data operations
 │   │   └── database.ts        # Legacy service exports
+│   ├── resources/         # MCP Resources for data access
+│   │   ├── index.ts           # Resource registration orchestrator
+│   │   ├── employeeResources.ts # Employee list/template resources
+│   │   ├── taskResources.ts     # Task list/template resources
+│   │   ├── tagResources.ts      # Tag list/template resources
+│   │   ├── programResources.ts  # Program list/template resources
+│   │   └── contractResources.ts # Contract list/template resources
 │   ├── types/             # TypeScript type definitions
 │   │   └── database.ts    # Database entity interfaces
 │   ├── database/          # Database configuration and management
@@ -332,6 +351,62 @@ Current MCP server capabilities:
 
 **Total: 25 MCP Tools**
 
+**MCP Resources (10 total):**
+
+**List Resources (5):**
+
+- `employees` - All employees in the database (`contract-manager://employees`)
+- `programs` - All programs in the database (`contract-manager://programs`)
+- `contracts` - All contracts in the database (`contract-manager://contracts`)
+- `tasks` - All tasks in the database (`contract-manager://tasks`)
+- `tags` - All tags in the database (`contract-manager://tags`)
+
+**Template Resources (5):**
+
+- `employee` - Individual employee by code (`contract-manager://employees/{code}`)
+- `program` - Individual program by code (`contract-manager://programs/{code}`)
+- `contract` - Individual contract by code (`contract-manager://contracts/{code}`)
+- `task` - Individual task by code (`contract-manager://tasks/{code}`)
+- `tag` - Individual tag by code (`contract-manager://tags/{code}`)
+
+**Resource Features:**
+
+- **Intelligent Completion**: Template resources provide code completion for friendly codes (E001, P001, C001, T001, TAG001)
+- **Bulk Access**: List resources enable efficient access to all entities of a type
+- **Parameterized URIs**: Template resources support dynamic code parameters with validation
+- **Resource Discovery**: Clean resource architecture with `list: undefined` to prevent bloat
+- **Consistent Patterns**: Standardized `contract-manager://` URI scheme across all resources
+- **Type Safety**: Full TypeScript integration with service layer and error handling
+
+**Tool Features:**
+
+**MCP Resources (10 total):**
+
+**List Resources (5):**
+
+- `employees` - All employees in the database (`contract-manager://employees`)
+- `programs` - All programs in the database (`contract-manager://programs`)
+- `contracts` - All contracts in the database (`contract-manager://contracts`)
+- `tasks` - All tasks in the database (`contract-manager://tasks`)
+- `tags` - All tags in the database (`contract-manager://tags`)
+
+**Template Resources (5):**
+
+- `employee` - Individual employee by code (`contract-manager://employees/{code}`)
+- `program` - Individual program by code (`contract-manager://programs/{code}`)
+- `contract` - Individual contract by code (`contract-manager://contracts/{code}`)
+- `task` - Individual task by code (`contract-manager://tasks/{code}`)
+- `tag` - Individual tag by code (`contract-manager://tags/{code}`)
+
+**Resource Features:**
+
+- **Intelligent Completion**: Template resources provide code completion for friendly codes (E001, P001, C001, T001, TAG001)
+- **Bulk Access**: List resources enable efficient access to all entities of a type
+- **Parameterized URIs**: Template resources support dynamic code parameters with validation
+- **Resource Discovery**: Clean resource architecture with `list: undefined` to prevent bloat
+- **Consistent Patterns**: Standardized `contract-manager://` URI scheme across all resources
+- **Type Safety**: Full TypeScript integration with service layer and error handling
+
 **Features:**
 
 - Human-readable friendly codes for all entities
@@ -421,6 +496,108 @@ Current MCP server capabilities:
           "mimeType": "application/json",
           "text": "{\"id\":\"550e8400-e29b-41d4-a716-446655440001\",\"code\":\"E001\",\"name\":\"Leia Organa\",\"job_title\":\"Senior Project Manager\",\"email\":\"leia.organa@rebellion.com\",\"created_at\":\"2025-01-20T...\",\"updated_at\":\"2025-01-20T...\"}"
         }
+      }
+    ]
+  }
+}
+```
+
+## MCP Resource Examples
+
+### List Resource Example
+
+**Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "resources/read",
+  "params": {
+    "uri": "contract-manager://employees"
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "contents": [
+      {
+        "mimeType": "application/json",
+        "text": "[{\"id\":\"550e8400-e29b-41d4-a716-446655440001\",\"code\":\"E001\",\"name\":\"Leia Organa\",\"job_title\":\"Senior Project Manager\",\"email\":\"leia.organa@rebellion.com\"},{\"id\":\"550e8400-e29b-41d4-a716-446655440002\",\"code\":\"E002\",\"name\":\"Luke Skywalker\",\"job_title\":\"Lead Developer\",\"email\":\"luke.skywalker@rebellion.com\"}]",
+        "uri": "contract-manager://employees"
+      }
+    ]
+  }
+}
+```
+
+### Template Resource Example
+
+**Request (with completion):**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "completion/complete",
+  "params": {
+    "ref": {
+      "type": "resource",
+      "uri": "contract-manager://employees/E0"
+    },
+    "argument": {
+      "name": "code",
+      "value": "E0"
+    }
+  }
+}
+```
+
+**Completion Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "completion": {
+      "values": ["E001", "E002", "E003", "E004", "E005"]
+    }
+  }
+}
+```
+
+**Resource Read Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "resources/read",
+  "params": {
+    "uri": "contract-manager://employees/E001"
+  }
+}
+```
+
+**Resource Read Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "contents": [
+      {
+        "mimeType": "application/json",
+        "text": "{\"id\":\"550e8400-e29b-41d4-a716-446655440001\",\"code\":\"E001\",\"name\":\"Leia Organa\",\"job_title\":\"Senior Project Manager\",\"email\":\"leia.organa@rebellion.com\",\"created_at\":\"2025-01-20T...\",\"updated_at\":\"2025-01-20T...\"}",
+        "uri": "contract-manager://employees/E001"
       }
     ]
   }

@@ -3,7 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import express from 'express';
 import { logger } from './utils/logger.js';
 import { initializeDatabase } from './database/connection.js';
-import { initializeTools } from './tools.js';
+import { initializeTools } from './tools/index.js';
 import { setupMiddleware } from './middleware/index.js';
 import { createRoutes } from './routes/index.js';
 import { setupProcessHandlers } from './utils/process.js';

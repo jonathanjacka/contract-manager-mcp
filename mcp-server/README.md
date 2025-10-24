@@ -58,6 +58,18 @@ This service is part of the larger Contract Manager ecosystem. See the [root REA
 - ✅ **Error Handling**: Proper error assertions with meaningful messages
 - ✅ **Clean Architecture**: Separated tools, schemas, middleware, and routes
 
+### Comprehensive CRUD Operations (v1.4.0)
+
+- ✅ **Task Management**: Full CRUD operations for tasks (create, update, delete, list by contract)
+- ✅ **Employee Management**: Complete employee lifecycle (add, edit, delete, assign to tasks, remove from tasks)
+- ✅ **Tag System**: Full tag management (create, edit, delete, apply to tasks, remove from tasks)
+- ✅ **Unique Validation**: Tag names must be unique across the system
+- ✅ **Relationship Management**: Proper handling of many-to-many relationships (employees-tasks, tags-tasks)
+- ✅ **Modular Architecture**: Organized tools by entity type in separate files for maintainability
+- ✅ **Service Layer Refactoring**: Dedicated service files for each entity with comprehensive operations
+- ✅ **Code-Based Operations**: All CRUD operations use friendly codes instead of UUIDs
+- ✅ **Cleanup Operations**: Delete operations properly handle relationship cleanup
+
 ## Project Structure
 
 ```
@@ -65,7 +77,22 @@ mcp-server/
 ├── src/                    # TypeScript source code
 │   ├── index.ts           # Main MCP server with HTTP transport
 │   ├── constants.ts       # Centralized server configuration
-│   ├── tools.ts           # MCP tools implementation
+│   ├── tools/             # Modular MCP tools organized by entity
+│   │   ├── index.ts           # Main tools orchestrator
+│   │   ├── employeeTools.ts   # Employee CRUD operations
+│   │   ├── taskTools.ts       # Task CRUD operations
+│   │   ├── tagTools.ts        # Tag CRUD operations
+│   │   ├── programTools.ts    # Program list/get operations
+│   │   ├── contractTools.ts   # Contract list/get operations
+│   │   └── utils.ts           # Shared utility functions
+│   ├── services/          # Modular business logic and data access
+│   │   ├── index.ts           # Service exports
+│   │   ├── employeeService.ts # Employee data operations
+│   │   ├── taskService.ts     # Task data operations
+│   │   ├── tagService.ts      # Tag data operations
+│   │   ├── programService.ts  # Program data operations
+│   │   ├── contractService.ts # Contract data operations
+│   │   └── database.ts        # Legacy service exports
 │   ├── types/             # TypeScript type definitions
 │   │   └── database.ts    # Database entity interfaces
 │   ├── database/          # Database configuration and management
@@ -74,8 +101,6 @@ mcp-server/
 │   │   │   └── 001_create_initial_tables.ts
 │   │   └── seeds/         # Database seed data
 │   │       └── 001_initial_data.ts
-│   ├── services/          # Business logic and data access
-│   │   └── database.ts    # Database service layer
 │   ├── schemas/           # Input validation schemas
 │   │   └── schema.ts      # Zod schemas for MCP tools
 │   ├── middleware/        # Express middleware
@@ -281,6 +306,32 @@ Current MCP server capabilities:
 - `get_task` - Get specific task by code (e.g., T001)
 - `get_tag` - Get specific tag by code (e.g., TAG001)
 
+**Task Management Tools (4):**
+
+- `create_task` - Create new tasks with completion tracking (0-10 scale)
+- `update_task` - Update task details and completion status
+- `delete_task` - Remove tasks (automatically cleans up relationships)
+- `get_tasks_by_contract` - List all tasks for a specific contract
+
+**Employee Management Tools (6):**
+
+- `add_employee` - Create new employees with roles and contact information
+- `edit_employee` - Update employee information (name, job title, email)
+- `delete_employee` - Remove employees (automatically cleans up task assignments)
+- `add_employee_to_task` - Assign employees to tasks
+- `remove_employee_from_task` - Remove employee assignments from tasks
+- `get_employee_by_task` - List all employees assigned to a specific task
+
+**Tag Management Tools (5):**
+
+- `create_tag` - Create new tags with unique names
+- `edit_tag` - Update tag information (names must remain unique)
+- `delete_tag` - Remove tags (automatically cleans up task relationships)
+- `add_tag_to_task` - Apply tags to tasks for categorization
+- `remove_tag_from_task` - Remove tag assignments from tasks
+
+**Total: 25 MCP Tools**
+
 **Features:**
 
 - Human-readable friendly codes for all entities
@@ -288,6 +339,10 @@ Current MCP server capabilities:
 - Full JSON embedding for detailed information
 - Type-safe input validation with Zod schemas
 - Comprehensive error handling
+- Modular architecture organized by entity type
+- Complete CRUD operations for tasks, employees, and tags
+- Relationship management with automatic cleanup
+- Unique constraint validation (e.g., tag names)
 
 ## MCP Tool Examples
 

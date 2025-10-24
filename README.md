@@ -61,6 +61,17 @@ This ecosystem consists of multiple services that work together:
 - ✅ **Zod Schema Validation**: Type-safe input validation for all MCP tool parameters
 - ✅ **Error Handling**: Proper error assertions with meaningful messages
 
+### Comprehensive CRUD Operations (v1.4.0)
+
+- ✅ **Task Management**: Full CRUD operations for tasks (create, update, delete, list by contract)
+- ✅ **Employee Management**: Complete employee lifecycle (add, edit, delete, assign to tasks, remove from tasks)
+- ✅ **Tag System**: Full tag management (create, edit, delete, apply to tasks, remove from tasks)
+- ✅ **Unique Validation**: Tag names must be unique across the system
+- ✅ **Relationship Management**: Proper handling of many-to-many relationships (employees-tasks, tags-tasks)
+- ✅ **Modular Architecture**: Organized tools by entity type for better maintainability
+- ✅ **Service Layer**: Dedicated service files for each entity with comprehensive operations
+- ✅ **Code-Based Operations**: All CRUD operations use friendly codes instead of UUIDs
+
 ## Project Structure
 
 ```
@@ -72,10 +83,24 @@ contract-manager/
     ├── src/              # TypeScript source code
     │   ├── index.ts      # Main MCP server with HTTP transport
     │   ├── constants.ts  # Centralized configuration
-    │   ├── tools.ts      # MCP tools implementation
+    │   ├── tools/        # Modular MCP tools organized by entity
+    │   │   ├── index.ts           # Main tools orchestrator
+    │   │   ├── employeeTools.ts   # Employee CRUD operations
+    │   │   ├── taskTools.ts       # Task CRUD operations
+    │   │   ├── tagTools.ts        # Tag CRUD operations
+    │   │   ├── programTools.ts    # Program list/get operations
+    │   │   ├── contractTools.ts   # Contract list/get operations
+    │   │   └── utils.ts           # Shared utility functions
+    │   ├── services/     # Modular business logic and data access
+    │   │   ├── index.ts           # Service exports
+    │   │   ├── employeeService.ts # Employee data operations
+    │   │   ├── taskService.ts     # Task data operations
+    │   │   ├── tagService.ts      # Tag data operations
+    │   │   ├── programService.ts  # Program data operations
+    │   │   ├── contractService.ts # Contract data operations
+    │   │   └── database.ts        # Legacy service exports
     │   ├── types/        # TypeScript type definitions
     │   ├── database/     # Database configuration and migrations
-    │   ├── services/     # Business logic and data access
     │   ├── schemas/      # Zod input validation schemas
     │   ├── middleware/   # Express middleware
     │   ├── routes/       # Express route handlers
@@ -235,6 +260,30 @@ The server provides comprehensive MCP tools for contract management:
 - `get_contract` - Get specific contract by code (e.g., C001)
 - `get_task` - Get specific task by code (e.g., T001)
 - `get_tag` - Get specific tag by code (e.g., TAG001)
+
+**Task Management Tools:**
+
+- `create_task` - Create new tasks with completion tracking
+- `update_task` - Update task details and completion status
+- `delete_task` - Remove tasks (automatically cleans up relationships)
+- `get_tasks_by_contract` - List all tasks for a specific contract
+
+**Employee Management Tools:**
+
+- `add_employee` - Create new employees with roles and contact info
+- `edit_employee` - Update employee information
+- `delete_employee` - Remove employees (automatically cleans up assignments)
+- `add_employee_to_task` - Assign employees to tasks
+- `remove_employee_from_task` - Remove employee assignments
+- `get_employee_by_task` - List all employees assigned to a task
+
+**Tag Management Tools:**
+
+- `create_tag` - Create new tags with unique names
+- `edit_tag` - Update tag information (names must remain unique)
+- `delete_tag` - Remove tags (automatically cleans up relationships)
+- `add_tag_to_task` - Apply tags to tasks for categorization
+- `remove_tag_from_task` - Remove tag assignments from tasks
 
 ### Future Services
 

@@ -1,4 +1,5 @@
 import { db } from '../database/connection.js';
+import { randomUUID } from 'crypto';
 import type {
   Program,
   Contract,
@@ -28,6 +29,117 @@ export const employeeService = {
 
   async getByCode(code: string): Promise<Employee | undefined> {
     return db('employees').where({ code }).first();
+  },
+
+  async createWithCode(data: {
+    name: string;
+    job_title: string;
+    email: string;
+  }): Promise<Employee> {
+    // Generate the next employee code manually
+    await db('code_counters').where({ entity_type: 'employees' }).increment('current_value', 1);
+
+    const counter = await db('code_counters')
+      .where({ entity_type: 'employees' })
+      .select('current_value')
+      .first();
+
+    const employeeCode = `E${String(counter.current_value).padStart(3, '0')}`;
+
+    const [employee] = await db('employees')
+      .insert({
+        id: randomUUID(),
+        code: employeeCode,
+        name: data.name,
+        job_title: data.job_title,
+        email: data.email,
+      })
+      .returning('*');
+    return employee;
+  },
+
+  async addToTask(employeeCode: string, taskCode: string): Promise<void> {
+    const employee = await this.getByCode(employeeCode);
+    if (!employee) throw new Error(`Employee with code ${employeeCode} not found`);
+
+    const task = await taskService.getByCode(taskCode);
+    if (!task) throw new Error(`Task with code ${taskCode} not found`);
+
+    // Check if assignment already exists
+    const existing = await db('task_assignments')
+      .where({ employee_id: employee.id, task_id: task.id })
+      .first();
+
+    if (existing) {
+      throw new Error(`Employee ${employeeCode} is already assigned to task ${taskCode}`);
+    }
+
+    await db('task_assignments').insert({
+      id: randomUUID(),
+      employee_id: employee.id,
+      task_id: task.id,
+    });
+  },
+
+  async getByTaskCode(taskCode: string): Promise<Employee[]> {
+    const task = await taskService.getByCode(taskCode);
+    if (!task) return [];
+
+    return db('employees')
+      .join('task_assignments', 'employees.id', 'task_assignments.employee_id')
+      .where('task_assignments.task_id', task.id)
+      .select('employees.*')
+      .orderBy('employees.name');
+  },
+
+  async updateByCode(
+    code: string,
+    data: { name?: string | undefined; job_title?: string | undefined; email?: string | undefined }
+  ): Promise<Employee> {
+    const employee = await this.getByCode(code);
+    if (!employee) throw new Error(`Employee with code ${code} not found`);
+
+    // Filter out undefined values
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.job_title !== undefined) updateData.job_title = data.job_title;
+    if (data.email !== undefined) updateData.email = data.email;
+    updateData.updated_at = new Date();
+
+    const [updatedEmployee] = await db('employees')
+      .where({ code })
+      .update(updateData)
+      .returning('*');
+    return updatedEmployee;
+  },
+
+  async deleteByCode(code: string): Promise<void> {
+    const employee = await this.getByCode(code);
+    if (!employee) throw new Error(`Employee with code ${code} not found`);
+
+    // Delete task assignments first
+    await db('task_assignments').where({ employee_id: employee.id }).del();
+    // Delete the employee
+    await db('employees').where({ code }).del();
+  },
+
+  async removeFromTask(employeeCode: string, taskCode: string): Promise<void> {
+    const employee = await this.getByCode(employeeCode);
+    if (!employee) throw new Error(`Employee with code ${employeeCode} not found`);
+
+    const task = await taskService.getByCode(taskCode);
+    if (!task) throw new Error(`Task with code ${taskCode} not found`);
+
+    // Check if assignment exists
+    const existing = await db('task_assignments')
+      .where({ employee_id: employee.id, task_id: task.id })
+      .first();
+
+    if (!existing) {
+      throw new Error(`Employee ${employeeCode} is not assigned to task ${taskCode}`);
+    }
+
+    await db('task_assignments').where({ employee_id: employee.id, task_id: task.id }).del();
   },
 
   async create(data: CreateEmployee): Promise<Employee> {
@@ -241,6 +353,113 @@ export const tagService = {
     return db('tags').where({ name }).first();
   },
 
+  async createWithCode(data: { name: string }): Promise<Tag> {
+    // Check if tag name already exists
+    const existing = await this.getByName(data.name);
+    if (existing) {
+      throw new Error(`Tag with name "${data.name}" already exists`);
+    }
+
+    // Generate the next tag code manually
+    await db('code_counters').where({ entity_type: 'tags' }).increment('current_value', 1);
+
+    const counter = await db('code_counters')
+      .where({ entity_type: 'tags' })
+      .select('current_value')
+      .first();
+
+    const tagCode = `TAG${String(counter.current_value).padStart(3, '0')}`;
+
+    const [tag] = await db('tags')
+      .insert({
+        id: randomUUID(),
+        code: tagCode,
+        name: data.name,
+      })
+      .returning('*');
+    return tag;
+  },
+
+  async updateByCode(code: string, data: { name?: string | undefined }): Promise<Tag> {
+    const tag = await this.getByCode(code);
+    if (!tag) throw new Error(`Tag with code ${code} not found`);
+
+    // Check if new name already exists (and it's different from current name)
+    if (data.name !== undefined && data.name !== tag.name) {
+      const existing = await this.getByName(data.name);
+      if (existing) {
+        throw new Error(`Tag with name "${data.name}" already exists`);
+      }
+    }
+
+    // Filter out undefined values
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    updateData.updated_at = new Date();
+
+    const [updatedTag] = await db('tags').where({ code }).update(updateData).returning('*');
+    return updatedTag;
+  },
+
+  async deleteByCode(code: string): Promise<void> {
+    const tag = await this.getByCode(code);
+    if (!tag) throw new Error(`Tag with code ${code} not found`);
+
+    // Delete task-tag relationships first
+    await db('task_tags').where({ tag_id: tag.id }).del();
+    // Delete the tag
+    await db('tags').where({ code }).del();
+  },
+
+  async addToTask(tagCode: string, taskCode: string): Promise<void> {
+    const tag = await this.getByCode(tagCode);
+    if (!tag) throw new Error(`Tag with code ${tagCode} not found`);
+
+    const task = await taskService.getByCode(taskCode);
+    if (!task) throw new Error(`Task with code ${taskCode} not found`);
+
+    // Check if relationship already exists
+    const existing = await db('task_tags').where({ tag_id: tag.id, task_id: task.id }).first();
+
+    if (existing) {
+      throw new Error(`Tag ${tagCode} is already applied to task ${taskCode}`);
+    }
+
+    await db('task_tags').insert({
+      id: randomUUID(),
+      tag_id: tag.id,
+      task_id: task.id,
+    });
+  },
+
+  async removeFromTask(tagCode: string, taskCode: string): Promise<void> {
+    const tag = await this.getByCode(tagCode);
+    if (!tag) throw new Error(`Tag with code ${tagCode} not found`);
+
+    const task = await taskService.getByCode(taskCode);
+    if (!task) throw new Error(`Task with code ${taskCode} not found`);
+
+    // Check if relationship exists
+    const existing = await db('task_tags').where({ tag_id: tag.id, task_id: task.id }).first();
+
+    if (!existing) {
+      throw new Error(`Tag ${tagCode} is not applied to task ${taskCode}`);
+    }
+
+    await db('task_tags').where({ tag_id: tag.id, task_id: task.id }).del();
+  },
+
+  async getByTaskCode(taskCode: string): Promise<Tag[]> {
+    const task = await taskService.getByCode(taskCode);
+    if (!task) return [];
+
+    return db('tags')
+      .join('task_tags', 'tags.id', 'task_tags.tag_id')
+      .where('task_tags.task_id', task.id)
+      .select('tags.*')
+      .orderBy('tags.name');
+  },
+
   async create(data: CreateTag): Promise<Tag> {
     const [tag] = await db('tags').insert(data).returning('*');
     return tag;
@@ -337,6 +556,71 @@ export const taskService = {
 
   async getByCode(code: string): Promise<Task | undefined> {
     return db('tasks').where({ code }).first();
+  },
+
+  async getByContractCode(contractCode: string): Promise<Task[]> {
+    const contract = await contractService.getByCode(contractCode);
+    if (!contract) return [];
+    return db('tasks').where({ contract_id: contract.id }).orderBy('name');
+  },
+
+  async createWithCode(data: {
+    name: string;
+    completion_value: number;
+    contract_code: string;
+  }): Promise<Task> {
+    const contract = await contractService.getByCode(data.contract_code);
+    if (!contract) throw new Error(`Contract with code ${data.contract_code} not found`);
+
+    // Generate the next task code manually
+    await db('code_counters').where({ entity_type: 'tasks' }).increment('current_value', 1);
+
+    const counter = await db('code_counters')
+      .where({ entity_type: 'tasks' })
+      .select('current_value')
+      .first();
+
+    const taskCode = `T${String(counter.current_value).padStart(3, '0')}`;
+
+    const [task] = await db('tasks')
+      .insert({
+        id: randomUUID(),
+        code: taskCode,
+        name: data.name,
+        completion_value: data.completion_value,
+        contract_id: contract.id,
+      })
+      .returning('*');
+    return task;
+  },
+
+  async updateByCode(
+    code: string,
+    data: { name?: string | undefined; completion_value?: number | undefined }
+  ): Promise<Task> {
+    const task = await this.getByCode(code);
+    if (!task) throw new Error(`Task with code ${code} not found`);
+
+    // Filter out undefined values
+    const updateData: any = {};
+    if (data.name !== undefined) updateData.name = data.name;
+    if (data.completion_value !== undefined) updateData.completion_value = data.completion_value;
+    updateData.updated_at = new Date();
+
+    const [updatedTask] = await db('tasks').where({ code }).update(updateData).returning('*');
+    return updatedTask;
+  },
+
+  async deleteByCode(code: string): Promise<void> {
+    const task = await this.getByCode(code);
+    if (!task) throw new Error(`Task with code ${code} not found`);
+
+    // Delete task-tag relationships first
+    await db('task_tags').where({ task_id: task.id }).del();
+    // Delete task assignments
+    await db('task_assignments').where({ task_id: task.id }).del();
+    // Delete the task
+    await db('tasks').where({ code }).del();
   },
 
   async getByContractId(contractId: string): Promise<Task[]> {

@@ -83,6 +83,18 @@ This ecosystem consists of multiple services that work together:
 - ✅ **Modular Resource Architecture**: Organized resources by entity type in separate files
 - ✅ **Error Handling**: Consistent error handling using project's assert utility
 
+### MCP Prompts Implementation (v1.6.0)
+
+- ✅ **MCP Prompts Capability**: Full implementation of MCP Prompts specification for structured AI interactions
+- ✅ **Contract Analysis Prompt**: Comprehensive contract analysis with tasks, team, and risk assessment
+- ✅ **Task Planning Prompt**: AI-powered task suggestions, breakdown, and planning recommendations
+- ✅ **Team Assignment Prompt**: Intelligent employee assignment suggestions based on skills and workload
+- ✅ **Progress Review Prompt**: Automated progress reports for contracts and programs with executive insights
+- ✅ **Tag Suggestions Prompt**: Smart tag recommendations for tasks with existing tag context
+- ✅ **Intelligent Completion**: All prompts support code completion for entity references
+- ✅ **Rich Context Embedding**: Prompts include relevant data as embedded resources for AI analysis
+- ✅ **Modular Prompt Architecture**: Organized prompts by functionality in separate files
+
 ## Project Structure
 
 ```
@@ -117,6 +129,13 @@ contract-manager/
     │   │   ├── tagResources.ts      # Tag list/template resources
     │   │   ├── programResources.ts  # Program list/template resources
     │   │   └── contractResources.ts # Contract list/template resources
+    │   ├── prompts/      # MCP Prompts for AI interactions
+    │   │   ├── index.ts            # Prompt registration
+    │   │   ├── contractAnalysis.ts # Contract analysis prompt
+    │   │   ├── taskPlanning.ts     # Task planning prompt
+    │   │   ├── teamAssignment.ts   # Team assignment prompt
+    │   │   ├── progressReview.ts   # Progress review prompt
+    │   │   └── tagSuggestions.ts   # Tag suggestions prompt
     │   ├── types/        # TypeScript type definitions
     │   ├── database/     # Database configuration and migrations
     │   ├── schemas/      # Zod input validation schemas
@@ -330,6 +349,26 @@ The server provides comprehensive MCP Resources for efficient data access:
 - **Clean Architecture**: Template resources use `list: undefined` to prevent resource bloat
 - **Consistent URI Patterns**: Standardized `contract-manager://` scheme across all resources
 - **Type Safety**: Full TypeScript integration with existing service layer
+
+### MCP Prompts
+
+The server provides intelligent MCP Prompts for AI-powered contract management workflows:
+
+**Available Prompts (5 total):**
+
+- `contract_analysis` - Comprehensive contract analysis with tasks, team, and risk assessment
+- `task_planning` - AI-powered task suggestions, breakdown, and planning recommendations  
+- `team_assignment` - Intelligent employee assignment suggestions based on skills and context
+- `progress_review` - Automated progress reports for contracts (by code) or programs (by code)
+- `suggest_tags` - Smart tag recommendations for tasks with existing tag context
+
+**Prompt Features:**
+
+- **Intelligent Completion**: All prompts support code completion for entity references (contracts, tasks, etc.)
+- **Rich Context**: Prompts embed relevant data as resources for comprehensive AI analysis
+- **Structured Instructions**: Clear, detailed instructions for specific business workflows
+- **Tool Integration**: Prompts suggest using existing MCP tools for implementing recommendations
+- **Executive Insights**: Progress reviews provide stakeholder-ready analysis and metrics
 
 ### Future Services
 

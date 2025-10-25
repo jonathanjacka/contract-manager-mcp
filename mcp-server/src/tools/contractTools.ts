@@ -3,6 +3,7 @@ import { contractService } from '../services/index.js';
 import { assert } from '../utils/assert.js';
 import { contractCodeSchema } from '../schemas/schema.js';
 import { createText, createContractResourceLink, createContractEmbeddedResource } from './utils.js';
+import type { ToolAnnotations } from '../types/annotations.js';
 
 export function registerContractTools(agent: ContractManagerMCP) {
   agent.server.registerTool(
@@ -10,6 +11,10 @@ export function registerContractTools(agent: ContractManagerMCP) {
     {
       title: 'List Contracts',
       description: 'List all contracts in the contract management system',
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
     },
     async () => {
       const contracts = await contractService.getAll();
@@ -25,6 +30,10 @@ export function registerContractTools(agent: ContractManagerMCP) {
     {
       title: 'Get Contract',
       description: 'Get a contract by its code',
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: contractCodeSchema,
     },
     async ({ code }) => {

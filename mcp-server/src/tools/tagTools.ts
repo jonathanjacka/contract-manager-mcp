@@ -13,6 +13,7 @@ import {
   createTagEmbeddedResource,
   createTaskEmbeddedResource,
 } from './utils.js';
+import type { ToolAnnotations } from '../types/annotations.js';
 
 export function registerTagTools(agent: ContractManagerMCP) {
   agent.server.registerTool(
@@ -20,6 +21,10 @@ export function registerTagTools(agent: ContractManagerMCP) {
     {
       title: 'List Tags',
       description: 'List all tags in the contract management system',
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
     },
     async () => {
       const tags = await tagService.getAll();
@@ -35,6 +40,10 @@ export function registerTagTools(agent: ContractManagerMCP) {
     {
       title: 'Get Tag',
       description: 'Get a tag by its code',
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: tagCodeSchema,
     },
     async ({ code }) => {
@@ -51,6 +60,10 @@ export function registerTagTools(agent: ContractManagerMCP) {
     {
       title: 'Create Tag',
       description: 'Create a new tag with a unique name',
+      annotations: {
+        destructiveHint: false,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: createTagInputSchema,
     },
     async tagData => {
@@ -71,6 +84,11 @@ export function registerTagTools(agent: ContractManagerMCP) {
     {
       title: 'Edit Tag',
       description: 'Update a tag. The new name must be unique.',
+      annotations: {
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: updateTagInputSchema,
     },
     async ({ code, ...updates }) => {
@@ -91,6 +109,9 @@ export function registerTagTools(agent: ContractManagerMCP) {
     {
       title: 'Delete Tag',
       description: 'Delete a tag',
+      annotations: {
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: tagCodeSchema,
     },
     async ({ code }) => {
@@ -111,6 +132,11 @@ export function registerTagTools(agent: ContractManagerMCP) {
     {
       title: 'Add Tag to Task',
       description: 'Apply a tag to a task',
+      annotations: {
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: tagTaskSchema,
     },
     async ({ tag_code, task_code }) => {
@@ -138,6 +164,11 @@ export function registerTagTools(agent: ContractManagerMCP) {
     {
       title: 'Remove Tag from Task',
       description: 'Remove a tag from a task',
+      annotations: {
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: tagTaskSchema,
     },
     async ({ tag_code, task_code }) => {

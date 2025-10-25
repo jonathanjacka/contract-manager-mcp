@@ -14,6 +14,7 @@ import {
   createEmployeeEmbeddedResource,
   createTaskEmbeddedResource,
 } from './utils.js';
+import type { ToolAnnotations } from '../types/annotations.js';
 
 export function registerEmployeeTools(agent: ContractManagerMCP) {
   agent.server.registerTool(
@@ -21,6 +22,10 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     {
       title: 'List Employees',
       description: 'List all employees in the contract management system',
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
     },
     async () => {
       const employees = await employeeService.getAll();
@@ -36,6 +41,10 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     {
       title: 'Get Employee',
       description: 'Get an employee by their code',
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: employeeCodeSchema,
     },
     async ({ code }) => {
@@ -52,6 +61,10 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     {
       title: 'Add Employee',
       description: 'Create a new employee',
+      annotations: {
+        destructiveHint: false,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: createEmployeeInputSchema,
     },
     async employeeData => {
@@ -72,6 +85,11 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     {
       title: 'Add Employee to Task',
       description: 'Assign an employee to a task',
+      annotations: {
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: employeeTaskSchema,
     },
     async ({ employee_code, task_code }) => {
@@ -99,6 +117,10 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     {
       title: 'Get Employees by Task',
       description: 'Get all employees assigned to a specific task',
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: taskCodeSchema,
     },
     async ({ code }) => {
@@ -122,6 +144,11 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     {
       title: 'Edit Employee',
       description: 'Update an employee. Fields that are not provided will not be updated.',
+      annotations: {
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: updateEmployeeInputSchema,
     },
     async ({ code, ...updates }) => {
@@ -142,6 +169,9 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     {
       title: 'Delete Employee',
       description: 'Delete an employee',
+      annotations: {
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: employeeCodeSchema,
     },
     async ({ code }) => {
@@ -162,6 +192,11 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     {
       title: 'Remove Employee from Task',
       description: 'Remove an employee assignment from a task',
+      annotations: {
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: employeeTaskSchema,
     },
     async ({ employee_code, task_code }) => {

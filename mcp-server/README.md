@@ -82,6 +82,19 @@ This service is part of the larger Contract Manager ecosystem. See the [root REA
 - ✅ **Error Handling**: Consistent error handling using project's assert utility
 - ✅ **Resource Template Configuration**: Proper `list: undefined` to prevent resource bloat
 
+### MCP Prompts Implementation (v1.6.0)
+
+- ✅ **MCP Prompts Capability**: Full implementation of MCP Prompts specification
+- ✅ **Contract Analysis Prompt**: Comprehensive analysis with tasks, team, risk assessment, and recommendations
+- ✅ **Task Planning Prompt**: AI-powered task suggestions, breakdown, dependencies, and resource planning
+- ✅ **Team Assignment Prompt**: Intelligent employee assignment based on skills, workload, and team composition
+- ✅ **Progress Review Prompt**: Automated reports for contracts and programs with executive-level insights
+- ✅ **Tag Suggestions Prompt**: Smart tag recommendations with existing tag context and creation workflow
+- ✅ **Intelligent Completion**: All prompts support code completion for entity references
+- ✅ **Rich Context Embedding**: Prompts include comprehensive data as embedded resources
+- ✅ **Structured Instructions**: Clear, detailed business workflow guidance for AI analysis
+- ✅ **Modular Prompt Files**: Organized prompts by functionality with dedicated files
+
 ## Project Structure
 
 ```
@@ -112,6 +125,13 @@ mcp-server/
 │   │   ├── tagResources.ts      # Tag list/template resources
 │   │   ├── programResources.ts  # Program list/template resources
 │   │   └── contractResources.ts # Contract list/template resources
+│   ├── prompts/           # MCP Prompts for AI interactions
+│   │   ├── index.ts            # Prompt registration orchestrator  
+│   │   ├── contractAnalysis.ts # Contract analysis prompt
+│   │   ├── taskPlanning.ts     # Task planning prompt
+│   │   ├── teamAssignment.ts   # Team assignment prompt
+│   │   ├── progressReview.ts   # Progress review prompt
+│   │   └── tagSuggestions.ts   # Tag suggestions prompt
 │   ├── types/             # TypeScript type definitions
 │   │   └── database.ts    # Database entity interfaces
 │   ├── database/          # Database configuration and management
@@ -378,25 +398,23 @@ Current MCP server capabilities:
 - **Consistent Patterns**: Standardized `contract-manager://` URI scheme across all resources
 - **Type Safety**: Full TypeScript integration with service layer and error handling
 
+**MCP Prompts (5 total):**
+
+- `contract_analysis` - Comprehensive contract analysis with tasks, team, and risk assessment
+- `task_planning` - AI-powered task suggestions, breakdown, dependencies, and resource planning
+- `team_assignment` - Intelligent employee assignment based on skills and team composition
+- `progress_review` - Automated progress reports for contracts (type: contract) or programs (type: program)
+- `suggest_tags` - Smart tag recommendations for tasks with existing tag context
+
+**Prompt Features:**
+
+- **Intelligent Completion**: All prompts support code completion for entity references
+- **Rich Context**: Prompts embed comprehensive data as resources for AI analysis
+- **Structured Instructions**: Clear business workflow guidance with specific deliverables
+- **Tool Integration**: Prompts suggest using existing MCP tools to implement recommendations
+- **Executive Insights**: Progress reviews provide stakeholder-ready metrics and analysis
+
 **Tool Features:**
-
-**MCP Resources (10 total):**
-
-**List Resources (5):**
-
-- `employees` - All employees in the database (`contract-manager://employees`)
-- `programs` - All programs in the database (`contract-manager://programs`)
-- `contracts` - All contracts in the database (`contract-manager://contracts`)
-- `tasks` - All tasks in the database (`contract-manager://tasks`)
-- `tags` - All tags in the database (`contract-manager://tags`)
-
-**Template Resources (5):**
-
-- `employee` - Individual employee by code (`contract-manager://employees/{code}`)
-- `program` - Individual program by code (`contract-manager://programs/{code}`)
-- `contract` - Individual contract by code (`contract-manager://contracts/{code}`)
-- `task` - Individual task by code (`contract-manager://tasks/{code}`)
-- `tag` - Individual tag by code (`contract-manager://tags/{code}`)
 
 **Resource Features:**
 
@@ -603,6 +621,106 @@ Current MCP server capabilities:
   }
 }
 ```
+
+## MCP Prompt Examples
+
+### Contract Analysis Prompt
+
+**Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "prompts/get",
+  "params": {
+    "name": "contract_analysis",
+    "arguments": {
+      "contractCode": "C001"
+    }
+  }
+}
+```
+
+**Response:** Returns a structured prompt with contract data, tasks, employees, and instructions for comprehensive analysis including risk assessment, team performance, and actionable recommendations.
+
+### Task Planning Prompt
+
+**Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "prompts/get",
+  "params": {
+    "name": "task_planning",
+    "arguments": {
+      "contractCode": "C001"
+    }
+  }
+}
+```
+
+**Response:** Returns a structured prompt with contract context, existing tasks, and team data, with instructions for AI to suggest missing tasks, dependencies, and resource planning.
+
+### Progress Review Prompt
+
+**Request (Contract Review):**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "prompts/get",
+  "params": {
+    "name": "progress_review",
+    "arguments": {
+      "type": "contract",
+      "code": "C001"
+    }
+  }
+}
+```
+
+**Request (Program Review):**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "prompts/get",
+  "params": {
+    "name": "progress_review",
+    "arguments": {
+      "type": "program", 
+      "code": "P001"
+    }
+  }
+}
+```
+
+**Response:** Returns executive-level progress analysis with financial status, timeline analysis, risk assessment, and strategic recommendations.
+
+### Tag Suggestions Prompt
+
+**Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 5,
+  "method": "prompts/get",
+  "params": {
+    "name": "suggest_tags",
+    "arguments": {
+      "taskCode": "T001"
+    }
+  }
+}
+```
+
+**Response:** Returns task context with available tags and instructions for AI to suggest relevant categorization tags, with guidance to use MCP tools for tag creation and assignment.
 
 ## MCP Inspector Setup
 

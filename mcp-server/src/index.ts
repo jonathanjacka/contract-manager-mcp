@@ -5,6 +5,7 @@ import { logger } from './utils/logger.js';
 import { initializeDatabase } from './database/connection.js';
 import { initializeTools } from './tools/index.js';
 import { initializeResources } from './resources/index.js';
+import { initializePrompts } from './prompts/index.js';
 import { setupMiddleware } from './middleware/index.js';
 import { createRoutes } from './routes/index.js';
 import { setupProcessHandlers } from './utils/process.js';
@@ -35,6 +36,7 @@ ${SERVER_INFO.description}
   async init() {
     await initializeTools(this);
     await initializeResources(this);
+    await initializePrompts(this);
   }
 }
 

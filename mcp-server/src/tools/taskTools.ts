@@ -8,6 +8,7 @@ import {
   updateTaskInputSchema,
 } from '../schemas/schema.js';
 import { createText, createTaskResourceLink, createTaskEmbeddedResource } from './utils.js';
+import type { ToolAnnotations } from '../types/annotations.js';
 
 export function registerTaskTools(agent: ContractManagerMCP) {
   agent.server.registerTool(
@@ -15,6 +16,10 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     {
       title: 'List Tasks',
       description: 'List all tasks in the contract management system',
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
     },
     async () => {
       const tasks = await taskService.getAll();
@@ -30,6 +35,10 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     {
       title: 'Get Task',
       description: 'Get a task by its code',
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: taskCodeSchema,
     },
     async ({ code }) => {
@@ -46,6 +55,10 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     {
       title: 'Create Task',
       description: 'Create a new task',
+      annotations: {
+        destructiveHint: false,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: createTaskInputSchema,
     },
     async taskData => {
@@ -66,6 +79,11 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     {
       title: 'Update Task',
       description: 'Update a task. Fields that are not provided will not be updated.',
+      annotations: {
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: updateTaskInputSchema,
     },
     async ({ code, ...updates }) => {
@@ -86,6 +104,9 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     {
       title: 'Delete Task',
       description: 'Delete a task',
+      annotations: {
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: taskCodeSchema,
     },
     async ({ code }) => {
@@ -106,6 +127,10 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     {
       title: 'Get Tasks by Contract',
       description: 'Get all tasks for a specific contract',
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
       inputSchema: contractCodeSchema,
     },
     async ({ code }) => {

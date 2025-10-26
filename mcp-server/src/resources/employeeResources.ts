@@ -2,6 +2,7 @@ import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ContractManagerMCP } from '../index.js';
 import { employeeService } from '../services/index.js';
 import { assert } from '../utils/assert.js';
+import type { ResourceAnnotations } from '../types/annotations.js';
 
 export function registerEmployeeResources(agent: ContractManagerMCP) {
   agent.server.registerResource(
@@ -10,6 +11,10 @@ export function registerEmployeeResources(agent: ContractManagerMCP) {
     {
       title: 'Employees',
       description: 'All employees currently in the database',
+      annotations: {
+        audience: ['user', 'assistant'],
+        priority: 0.7,
+      } satisfies ResourceAnnotations,
     },
     async uri => {
       const employees = await employeeService.getAll();
@@ -53,6 +58,10 @@ export function registerEmployeeResources(agent: ContractManagerMCP) {
     {
       title: 'Employee',
       description: 'A single employee with the given code',
+      annotations: {
+        audience: ['user', 'assistant'],
+        priority: 0.7,
+      } satisfies ResourceAnnotations,
     },
     async (uri, { code }) => {
       assert(typeof code === 'string', `Invalid employee code: ${code}`);

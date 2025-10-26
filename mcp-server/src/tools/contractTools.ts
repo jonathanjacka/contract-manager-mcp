@@ -1,7 +1,12 @@
 import type { ContractManagerMCP } from '../index.js';
 import { contractService } from '../services/index.js';
 import { assert } from '../utils/assert.js';
-import { contractCodeSchema } from '../schemas/schema.js';
+import { z } from 'zod';
+import {
+  contractCodeSchema,
+  contractListOutputSchema,
+  contractOutputSchema,
+} from '../schemas/schema.js';
 import { createText, createContractResourceLink, createContractEmbeddedResource } from './utils.js';
 import type { ToolAnnotations } from '../types/annotations.js';
 
@@ -15,12 +20,22 @@ export function registerContractTools(agent: ContractManagerMCP) {
         readOnlyHint: true,
         openWorldHint: false,
       } satisfies ToolAnnotations,
+      outputSchema: contractListOutputSchema,
     },
     async () => {
       const contracts = await contractService.getAll();
       const contractLinks = contracts.map(createContractResourceLink);
+      const structuredContent = {
+        contracts,
+        count: contracts.length,
+      };
       return {
-        content: [createText(`Found ${contracts.length} contracts.`), ...contractLinks],
+        content: [
+          createText(`Found ${contracts.length} contracts.`),
+          ...contractLinks,
+          createText(structuredContent),
+        ],
+        structuredContent,
       };
     }
   );
@@ -35,12 +50,15 @@ export function registerContractTools(agent: ContractManagerMCP) {
         openWorldHint: false,
       } satisfies ToolAnnotations,
       inputSchema: contractCodeSchema,
+      outputSchema: { contract: z.object(contractOutputSchema) },
     },
     async ({ code }) => {
       const contract = await contractService.getByCode(code);
       assert(contract, `Contract with code "${code}" not found`);
+      const structuredContent = { contract };
       return {
-        content: [createContractEmbeddedResource(contract)],
+        content: [createContractEmbeddedResource(contract), createText(structuredContent)],
+        structuredContent,
       };
     }
   );

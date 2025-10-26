@@ -108,6 +108,17 @@ This service is part of the larger Contract Manager ecosystem. See the [root REA
 - ✅ **Resource Priority Hierarchy**: Business-logic driven priorities (Programs: 1.0, Contracts: 0.9, Tasks: 0.8, Employees: 0.7, Tags: 0.5)
 - ✅ **Audience Targeting**: All resources target both `user` and `assistant` audiences for comprehensive access
 - ✅ **Client Optimization**: Annotations enable smart context window management, tool selection, and safety warnings by MCP clients
+
+### Structured Content Implementation (v1.8.0)
+
+- ✅ **MCP Structured Content**: Complete implementation of MCP structured content specification for all 21 tools
+- ✅ **Output Schemas**: Comprehensive Zod-based output schemas for all entity types and operations
+- ✅ **Backward Compatibility**: All tools return both `content` (for compatibility) and `structuredContent` (for type safety)
+- ✅ **Type-Safe Validation**: Structured content validated against schemas ensuring data consistency
+- ✅ **Collection Schemas**: Specialized schemas for list operations with count metadata
+- ✅ **Operation Result Schemas**: Standardized result schemas for create, update, delete, and assignment operations
+- ✅ **Rich Metadata**: Enhanced structured content with operation success indicators and descriptive messages
+- ✅ **Schema Consistency**: All structured content follows consistent patterns across the entire tool ecosystem
 - ✅ **Modular Architecture**: Annotations organized in centralized types file with consistent imports across all tool/resource files
 
 ## Project Structure
@@ -491,6 +502,118 @@ The database includes realistic sample data with:
 - **8 tags** with codes TAG001-TAG008 for task categorization
 
 All entities use friendly codes for easy reference in MCP tools.
+
+## MCP Structured Content
+
+The server implements comprehensive structured content support following the MCP specification, providing both human-readable text content and machine-readable JSON data for all tool responses.
+
+### Output Schema Design
+
+All tools include `outputSchema` definitions using Zod for type-safe validation:
+
+**Entity Schemas:**
+
+```typescript
+// Individual entity schemas
+const taskOutputSchema = {
+  id: z.string(),
+  code: z.string(),
+  name: z.string(),
+  completion_value: z.number(),
+  contract_id: z.string(),
+  created_at: z.date(),
+  updated_at: z.date(),
+};
+
+// Collection schemas with metadata
+const taskListOutputSchema = {
+  tasks: z.array(z.object(taskOutputSchema)),
+  count: z.number(),
+};
+```
+
+**Operation Result Schemas:**
+
+```typescript
+// Standardized operation results
+const createResultSchema = {
+  success: z.boolean(),
+  created: z.boolean().default(true),
+  message: z.string(),
+};
+
+const updateResultSchema = {
+  success: z.boolean(),
+  updated: z.boolean().default(true),
+  message: z.string(),
+};
+```
+
+### Tool Response Pattern
+
+Every tool follows a consistent pattern returning both content types:
+
+```typescript
+// Example from create_task tool
+return {
+  content: [
+    createText(`Task "${createdTask.name}" created successfully`),
+    createTaskEmbeddedResource(createdTask),
+  ],
+  structuredContent: {
+    task: createdTask,
+    success: true,
+    created: true,
+    message: `Task "${createdTask.name}" created successfully with code "${createdTask.code}"`,
+  },
+};
+```
+
+### Schema Categories
+
+**List Operations** (5 tools):
+
+- Return collections with `{ entities: Entity[], count: number }`
+- Enable pagination and bulk processing
+- Provide comprehensive entity metadata
+
+**Individual Get Operations** (5 tools):
+
+- Return single entities with `{ entity: Entity }`
+- Include full entity details and relationships
+- Support deep entity inspection
+
+**Create Operations** (3 tools):
+
+- Return created entity plus operation metadata
+- Include success indicators and descriptive messages
+- Support workflow automation
+
+**Update Operations** (3 tools):
+
+- Return updated entity with change confirmation
+- Include success status and operation details
+- Enable idempotent operations
+
+**Delete Operations** (3 tools):
+
+- Return deleted entity for audit purposes
+- Include deletion confirmation and metadata
+- Support rollback scenarios
+
+**Assignment Operations** (2 tools):
+
+- Return both entities involved in relationship
+- Include assignment status and operation success
+- Support complex relationship management
+
+### Benefits
+
+- **Type Safety**: Clients can validate responses against schemas
+- **Better Integration**: Programming languages can generate types from schemas
+- **Rich Metadata**: Additional context beyond basic entity data
+- **Backward Compatibility**: Maintains text content for existing clients
+- **Tool Automation**: Enables sophisticated automated workflows
 
 ## API Endpoints
 

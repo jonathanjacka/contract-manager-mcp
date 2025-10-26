@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-// Input schemas for MCP tools using Zod
 export const employeeCodeSchema = {
   code: z.string().describe('Employee code (e.g., E001)'),
 };
@@ -21,7 +20,6 @@ export const tagCodeSchema = {
   code: z.string().describe('Tag code (e.g., TAG001)'),
 };
 
-// Task CRUD schemas
 export const createTaskInputSchema = {
   name: z.string().describe('Task name'),
   completion_value: z.number().min(0).max(10).describe('Task completion value (0-10)'),
@@ -34,7 +32,6 @@ export const updateTaskInputSchema = {
   completion_value: z.number().min(0).max(10).optional().describe('New completion value (0-10)'),
 };
 
-// Employee CRUD schemas
 export const createEmployeeInputSchema = {
   name: z.string().describe('Employee name'),
   job_title: z.string().describe('Employee job title'),
@@ -53,7 +50,6 @@ export const employeeTaskSchema = {
   task_code: z.string().describe('Task code (e.g., T001)'),
 };
 
-// Tag CRUD schemas
 export const createTagInputSchema = {
   name: z.string().describe('Tag name (must be unique)'),
 };
@@ -67,3 +63,79 @@ export const tagTaskSchema = {
   tag_code: z.string().describe('Tag code (e.g., TAG001)'),
   task_code: z.string().describe('Task code (e.g., T001)'),
 };
+
+export const programOutputSchema = {
+  id: z.string(),
+  code: z.string(),
+  name: z.string(),
+  description: z.string(),
+  manager_id: z.string(),
+  created_at: z.union([z.number(), z.date(), z.string()]),
+  updated_at: z.union([z.number(), z.date(), z.string()]),
+};
+
+export const contractOutputSchema = {
+  id: z.string(),
+  code: z.string(),
+  name: z.string(),
+  description: z.string(),
+  program_id: z.string(),
+  created_at: z.union([z.number(), z.date(), z.string()]),
+  updated_at: z.union([z.number(), z.date(), z.string()]),
+};
+
+export const taskOutputSchema = {
+  id: z.string(),
+  code: z.string(),
+  name: z.string(),
+  completion_value: z.number(),
+  contract_id: z.string(),
+  created_at: z.union([z.number(), z.date(), z.string()]),
+  updated_at: z.union([z.number(), z.date(), z.string()]),
+};
+
+export const employeeOutputSchema = {
+  id: z.string(),
+  code: z.string(),
+  name: z.string(),
+  job_title: z.string(),
+  email: z.string(),
+  created_at: z.union([z.number(), z.date(), z.string()]),
+  updated_at: z.union([z.number(), z.date(), z.string()]),
+};
+
+export const tagOutputSchema = {
+  id: z.string(),
+  code: z.string(),
+  name: z.string(),
+  created_at: z.union([z.number(), z.date(), z.string()]),
+  updated_at: z.union([z.number(), z.date(), z.string()]),
+};
+
+export const programListOutputSchema = {
+  programs: z.array(z.object(programOutputSchema)),
+  count: z.number(),
+};
+
+export const contractListOutputSchema = {
+  contracts: z.array(z.object(contractOutputSchema)),
+  count: z.number(),
+};
+
+export const taskListOutputSchema = {
+  tasks: z.array(z.object(taskOutputSchema)),
+  count: z.number(),
+};
+
+export const employeeListOutputSchema = {
+  employees: z.array(z.object(employeeOutputSchema)),
+  count: z.number(),
+};
+
+export const tagListOutputSchema = {
+  tags: z.array(z.object(tagOutputSchema)),
+  count: z.number(),
+};
+
+// These schemas are removed as they create redundant structured content
+// The success/failure is implicit in the successful return of entity data

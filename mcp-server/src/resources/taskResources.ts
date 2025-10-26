@@ -2,6 +2,7 @@ import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ContractManagerMCP } from '../index.js';
 import { taskService } from '../services/index.js';
 import { assert } from '../utils/assert.js';
+import type { ResourceAnnotations } from '../types/annotations.js';
 
 export function registerTaskResources(agent: ContractManagerMCP) {
   agent.server.registerResource(
@@ -10,6 +11,10 @@ export function registerTaskResources(agent: ContractManagerMCP) {
     {
       title: 'Tasks',
       description: 'All tasks currently in the database',
+      annotations: {
+        audience: ['user', 'assistant'],
+        priority: 0.8,
+      } satisfies ResourceAnnotations,
     },
     async uri => {
       const tasks = await taskService.getAll();
@@ -41,6 +46,10 @@ export function registerTaskResources(agent: ContractManagerMCP) {
     {
       title: 'Task',
       description: 'A single task with the given code',
+      annotations: {
+        audience: ['user', 'assistant'],
+        priority: 0.8,
+      } satisfies ResourceAnnotations,
     },
     async (uri, { code }) => {
       assert(typeof code === 'string', `Invalid task code: ${code}`);

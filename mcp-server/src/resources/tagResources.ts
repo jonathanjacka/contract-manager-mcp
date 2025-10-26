@@ -2,6 +2,7 @@ import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ContractManagerMCP } from '../index.js';
 import { tagService } from '../services/index.js';
 import { assert } from '../utils/assert.js';
+import type { ResourceAnnotations } from '../types/annotations.js';
 
 export function registerTagResources(agent: ContractManagerMCP) {
   agent.server.registerResource(
@@ -10,6 +11,10 @@ export function registerTagResources(agent: ContractManagerMCP) {
     {
       title: 'Tags',
       description: 'All tags currently in the database',
+      annotations: {
+        audience: ['user', 'assistant'],
+        priority: 0.5,
+      } satisfies ResourceAnnotations,
     },
     async uri => {
       const tags = await tagService.getAll();
@@ -41,6 +46,10 @@ export function registerTagResources(agent: ContractManagerMCP) {
     {
       title: 'Tag',
       description: 'A single tag with the given code',
+      annotations: {
+        audience: ['user', 'assistant'],
+        priority: 0.5,
+      } satisfies ResourceAnnotations,
     },
     async (uri, { code }) => {
       assert(typeof code === 'string', `Invalid tag code: ${code}`);

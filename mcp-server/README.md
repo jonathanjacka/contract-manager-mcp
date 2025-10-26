@@ -95,6 +95,21 @@ This service is part of the larger Contract Manager ecosystem. See the [root REA
 - ✅ **Structured Instructions**: Clear, detailed business workflow guidance for AI analysis
 - ✅ **Modular Prompt Files**: Organized prompts by functionality with dedicated files
 
+### MCP Annotations Implementation (v1.7.0)
+
+- ✅ **Tool Annotations**: Complete MCP ToolAnnotations implementation for all 21 tools with semantic behavior hints
+- ✅ **Resource Annotations**: MCP Annotations implementation for all 10 resources with priority and audience targeting
+- ✅ **Type-Safe Annotations**: Custom TypeScript types (`ToolAnnotations`, `ResourceAnnotations`) enforcing proper combinations
+- ✅ **Read-Only Operations**: Proper `readOnlyHint: true` for all list/get operations (13 tools) with `openWorldHint: false`
+- ✅ **Safe Operations**: `destructiveHint: false` for create/update operations indicating additive-only changes
+- ✅ **Idempotent Operations**: `idempotentHint: true` for update and assignment operations that can be safely repeated
+- ✅ **Delete Operations**: Proper destructive operation handling with default `destructiveHint: true` for delete tools (3 tools)
+- ✅ **Closed-World System**: `openWorldHint: false` across all tools indicating self-contained contract management domain
+- ✅ **Resource Priority Hierarchy**: Business-logic driven priorities (Programs: 1.0, Contracts: 0.9, Tasks: 0.8, Employees: 0.7, Tags: 0.5)
+- ✅ **Audience Targeting**: All resources target both `user` and `assistant` audiences for comprehensive access
+- ✅ **Client Optimization**: Annotations enable smart context window management, tool selection, and safety warnings by MCP clients
+- ✅ **Modular Architecture**: Annotations organized in centralized types file with consistent imports across all tool/resource files
+
 ## Project Structure
 
 ```
@@ -126,14 +141,15 @@ mcp-server/
 │   │   ├── programResources.ts  # Program list/template resources
 │   │   └── contractResources.ts # Contract list/template resources
 │   ├── prompts/           # MCP Prompts for AI interactions
-│   │   ├── index.ts            # Prompt registration orchestrator  
+│   │   ├── index.ts            # Prompt registration orchestrator
 │   │   ├── contractAnalysis.ts # Contract analysis prompt
 │   │   ├── taskPlanning.ts     # Task planning prompt
 │   │   ├── teamAssignment.ts   # Team assignment prompt
 │   │   ├── progressReview.ts   # Progress review prompt
 │   │   └── tagSuggestions.ts   # Tag suggestions prompt
 │   ├── types/             # TypeScript type definitions
-│   │   └── database.ts    # Database entity interfaces
+│   │   ├── database.ts    # Database entity interfaces
+│   │   └── annotations.ts # MCP annotation type definitions
 │   ├── database/          # Database configuration and management
 │   │   ├── connection.ts  # Knex configuration and connection
 │   │   ├── migrations/    # Database schema migrations
@@ -271,6 +287,168 @@ To customize your environment:
    ```
 
 **Note:** The `.env` file is ignored by git to keep your local configuration private.
+
+## MCP Annotations
+
+The server implements comprehensive MCP annotations for both tools and resources, providing semantic information to help MCP clients make intelligent decisions about tool usage, resource prioritization, and context management.
+
+### Tool Annotations
+
+All 21 tools include semantic behavior annotations following the MCP ToolAnnotations specification:
+
+#### Annotation Types
+
+**Read-Only Operations** (13 tools):
+
+```typescript
+annotations: {
+  readOnlyHint: true,
+  openWorldHint: false,
+} satisfies ToolAnnotations
+```
+
+- All `list_*` and `get_*` tools
+- `get_tasks_by_contract`, `get_employee_by_task`
+- No environment modifications, safe for repeated execution
+
+**Create Operations** (3 tools):
+
+```typescript
+annotations: {
+  destructiveHint: false,
+  openWorldHint: false,
+} satisfies ToolAnnotations
+```
+
+- `create_task`, `add_employee`, `create_tag`
+- Additive operations that don't modify existing data
+
+**Update/Assignment Operations** (5 tools):
+
+```typescript
+annotations: {
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false,
+} satisfies ToolAnnotations
+```
+
+- `update_task`, `edit_employee`, `edit_tag`
+- `add_employee_to_task`, `add_tag_to_task`, `remove_employee_from_task`, `remove_tag_from_task`
+- Safe operations that can be repeated without additional side effects
+
+**Delete Operations** (3 tools):
+
+```typescript
+annotations: {
+  openWorldHint: false,
+} satisfies ToolAnnotations
+```
+
+- `delete_task`, `delete_employee`, `delete_tag`
+- Uses default `destructiveHint: true` to warn about destructive nature
+
+#### Type Safety
+
+The `ToolAnnotations` type enforces proper annotation combinations:
+
+```typescript
+export type ToolAnnotations = {
+  openWorldHint?: false; // Closed-world system
+} & (
+  | {
+      readOnlyHint: true; // Read-only: no other annotations allowed
+    }
+  | {
+      destructiveHint?: false; // Only allow explicit false
+      idempotentHint?: true; // Only allow explicit true
+    }
+);
+```
+
+### Resource Annotations
+
+All 10 resources include priority and audience annotations:
+
+#### Priority Hierarchy
+
+Resources are prioritized based on business importance:
+
+- **Priority 1.0** (Critical): Programs - Top-level organizational units
+- **Priority 0.9** (Very High): Contracts - Core business agreements
+- **Priority 0.8** (High): Tasks - Operational work items
+- **Priority 0.7** (Medium-High): Employees - Human resource information
+- **Priority 0.5** (Medium): Tags - Categorization metadata
+
+#### Audience Targeting
+
+All resources target both audiences:
+
+```typescript
+annotations: {
+  audience: ['user', 'assistant'],
+  priority: 0.9, // Example priority
+} satisfies ResourceAnnotations
+```
+
+#### Type Safety
+
+The `ResourceAnnotations` type ensures consistent structure:
+
+```typescript
+export type ResourceAnnotations = {
+  audience?: ('user' | 'assistant')[];
+  priority?: number; // 0 (least important) to 1 (most important)
+  lastModified?: string; // ISO 8601 format
+};
+```
+
+### Client Benefits
+
+Annotations enable MCP clients to:
+
+1. **Smart Tool Selection**: Understand tool behavior before execution
+2. **Safety Warnings**: Alert users about destructive operations
+3. **Context Optimization**: Prioritize resources in limited context windows
+4. **Idempotent Operations**: Safely retry update operations
+5. **Audience Filtering**: Show relevant resources to appropriate users
+6. **Performance Optimization**: Cache read-only operations
+
+### Implementation Pattern
+
+All tools and resources follow consistent annotation patterns:
+
+```typescript
+// Tool example
+agent.server.registerTool(
+  'tool_name',
+  {
+    title: 'Tool Title',
+    description: 'Tool description',
+    annotations: {
+      readOnlyHint: true,
+      openWorldHint: false,
+    } satisfies ToolAnnotations,
+    inputSchema: schema,
+  },
+  handler
+);
+
+// Resource example
+agent.server.registerResource(
+  'resource_name',
+  'uri',
+  {
+    title: 'Resource Title',
+    description: 'Resource description',
+    annotations: {
+      audience: ['user', 'assistant'],
+      priority: 0.8,
+    } satisfies ResourceAnnotations,
+  },
+  handler
+);
+```
 
 ## Database Schema
 
@@ -693,7 +871,7 @@ Current MCP server capabilities:
   "params": {
     "name": "progress_review",
     "arguments": {
-      "type": "program", 
+      "type": "program",
       "code": "P001"
     }
   }

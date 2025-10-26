@@ -95,6 +95,20 @@ This ecosystem consists of multiple services that work together:
 - ✅ **Rich Context Embedding**: Prompts include relevant data as embedded resources for AI analysis
 - ✅ **Modular Prompt Architecture**: Organized prompts by functionality in separate files
 
+### MCP Annotations Implementation (v1.7.0)
+
+- ✅ **Tool Annotations**: Complete MCP ToolAnnotations implementation for all 21 tools with semantic behavior hints
+- ✅ **Resource Annotations**: MCP Annotations implementation for all 10 resources with priority and audience targeting
+- ✅ **Type-Safe Annotations**: Custom TypeScript types enforcing proper annotation combinations and defaults
+- ✅ **Read-Only Operations**: Proper `readOnlyHint: true` for all list/get operations (13 tools)
+- ✅ **Safe Operations**: `destructiveHint: false` for create/update operations with clear behavior indicators
+- ✅ **Idempotent Operations**: `idempotentHint: true` for update and assignment operations that can be safely repeated
+- ✅ **Delete Operations**: Proper destructive operation handling with default `destructiveHint: true` for delete tools
+- ✅ **Closed-World System**: `openWorldHint: false` across all tools indicating self-contained contract management
+- ✅ **Resource Priorities**: Business-logic driven priority hierarchy (Programs: 1.0, Contracts: 0.9, Tasks: 0.8, Employees: 0.7, Tags: 0.5)
+- ✅ **Audience Targeting**: All resources target both `user` and `assistant` audiences for comprehensive access
+- ✅ **Client Optimization**: Annotations enable smart context window management and tool selection by MCP clients
+
 ## Project Structure
 
 ```
@@ -137,6 +151,7 @@ contract-manager/
     │   │   ├── progressReview.ts   # Progress review prompt
     │   │   └── tagSuggestions.ts   # Tag suggestions prompt
     │   ├── types/        # TypeScript type definitions
+    │   │   └── annotations.ts  # MCP annotation type definitions
     │   ├── database/     # Database configuration and migrations
     │   ├── schemas/      # Zod input validation schemas
     │   ├── middleware/   # Express middleware
@@ -280,9 +295,16 @@ The MCP server includes a complete contract management database with:
 
 ### MCP Tools
 
-The server provides comprehensive MCP tools for contract management:
+The server provides comprehensive MCP tools for contract management with full MCP annotations for optimal client behavior:
 
-**List Tools:**
+**Tool Annotations Features:**
+
+- **Behavior Hints**: All tools include semantic annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`)
+- **Type Safety**: Custom `ToolAnnotations` type enforces proper annotation combinations
+- **Client Optimization**: Annotations help MCP clients with tool selection, context management, and safety warnings
+- **Closed-World System**: All tools marked with `openWorldHint: false` indicating self-contained operations
+
+**List Tools** (Read-Only):
 
 - `list_employees` - List all employees with their roles and departments
 - `list_programs` - List all programs with descriptions
@@ -290,7 +312,7 @@ The server provides comprehensive MCP tools for contract management:
 - `list_tasks` - List all tasks with completion status
 - `list_tags` - List all tags for categorization
 
-**Individual Get Tools:**
+**Individual Get Tools** (Read-Only):
 
 - `get_employee` - Get specific employee by code (e.g., E001)
 - `get_program` - Get specific program by code (e.g., P001)
@@ -298,33 +320,48 @@ The server provides comprehensive MCP tools for contract management:
 - `get_task` - Get specific task by code (e.g., T001)
 - `get_tag` - Get specific tag by code (e.g., TAG001)
 
-**Task Management Tools:**
+**Task Management Tools** (Mixed Operations):
 
-- `create_task` - Create new tasks with completion tracking
-- `update_task` - Update task details and completion status
-- `delete_task` - Remove tasks (automatically cleans up relationships)
-- `get_tasks_by_contract` - List all tasks for a specific contract
+- `create_task` - Create new tasks with completion tracking (Safe: `destructiveHint: false`)
+- `update_task` - Update task details and completion status (Safe & Idempotent: `destructiveHint: false, idempotentHint: true`)
+- `delete_task` - Remove tasks (Destructive: default `destructiveHint: true`)
+- `get_tasks_by_contract` - List all tasks for a specific contract (Read-Only)
 
-**Employee Management Tools:**
+**Employee Management Tools** (Mixed Operations):
 
-- `add_employee` - Create new employees with roles and contact info
-- `edit_employee` - Update employee information
-- `delete_employee` - Remove employees (automatically cleans up assignments)
-- `add_employee_to_task` - Assign employees to tasks
-- `remove_employee_from_task` - Remove employee assignments
-- `get_employee_by_task` - List all employees assigned to a task
+- `add_employee` - Create new employees with roles and contact info (Safe: `destructiveHint: false`)
+- `edit_employee` - Update employee information (Safe & Idempotent: `destructiveHint: false, idempotentHint: true`)
+- `delete_employee` - Remove employees (Destructive: default `destructiveHint: true`)
+- `add_employee_to_task` - Assign employees to tasks (Safe & Idempotent: `destructiveHint: false, idempotentHint: true`)
+- `remove_employee_from_task` - Remove employee assignments (Safe & Idempotent: `destructiveHint: false, idempotentHint: true`)
+- `get_employee_by_task` - List all employees assigned to a task (Read-Only)
 
-**Tag Management Tools:**
+**Tag Management Tools** (Mixed Operations):
 
-- `create_tag` - Create new tags with unique names
-- `edit_tag` - Update tag information (names must remain unique)
-- `delete_tag` - Remove tags (automatically cleans up relationships)
-- `add_tag_to_task` - Apply tags to tasks for categorization
-- `remove_tag_from_task` - Remove tag assignments from tasks
+- `create_tag` - Create new tags with unique names (Safe: `destructiveHint: false`)
+- `edit_tag` - Update tag information (Safe & Idempotent: `destructiveHint: false, idempotentHint: true`)
+- `delete_tag` - Remove tags (Destructive: default `destructiveHint: true`)
+- `add_tag_to_task` - Apply tags to tasks for categorization (Safe & Idempotent: `destructiveHint: false, idempotentHint: true`)
+- `remove_tag_from_task` - Remove tag assignments from tasks (Safe & Idempotent: `destructiveHint: false, idempotentHint: true`)
 
 ### MCP Resources
 
-The server provides comprehensive MCP Resources for efficient data access:
+The server provides comprehensive MCP Resources for efficient data access with priority-based annotations:
+
+**Resource Annotations Features:**
+
+- **Priority Hierarchy**: Business-logic driven priorities from 0.5 to 1.0 for context window optimization
+- **Audience Targeting**: All resources target both `user` and `assistant` for comprehensive access
+- **Type Safety**: Custom `ResourceAnnotations` type ensures consistent annotation structure
+- **Client Optimization**: Annotations help clients prioritize resources in context-limited scenarios
+
+**Resource Priority Levels:**
+
+- **Priority 1.0** (Critical): Programs - Top-level organizational units
+- **Priority 0.9** (Very High): Contracts - Core business agreements
+- **Priority 0.8** (High): Tasks - Operational work items
+- **Priority 0.7** (Medium-High): Employees - Human resource information
+- **Priority 0.5** (Medium): Tags - Categorization and filtering metadata
 
 **List Resources (5 total):**
 
@@ -357,7 +394,7 @@ The server provides intelligent MCP Prompts for AI-powered contract management w
 **Available Prompts (5 total):**
 
 - `contract_analysis` - Comprehensive contract analysis with tasks, team, and risk assessment
-- `task_planning` - AI-powered task suggestions, breakdown, and planning recommendations  
+- `task_planning` - AI-powered task suggestions, breakdown, and planning recommendations
 - `team_assignment` - Intelligent employee assignment suggestions based on skills and context
 - `progress_review` - Automated progress reports for contracts (by code) or programs (by code)
 - `suggest_tags` - Smart tag recommendations for tasks with existing tag context

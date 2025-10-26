@@ -109,6 +109,14 @@ This ecosystem consists of multiple services that work together:
 - ✅ **Audience Targeting**: All resources target both `user` and `assistant` audiences for comprehensive access
 - ✅ **Client Optimization**: Annotations enable smart context window management and tool selection by MCP clients
 
+### Structured Content Implementation (v1.8.0)
+
+- ✅ **MCP Structured Content**: Complete implementation of MCP structured content specification for all 21 tools
+- ✅ **Output Schemas**: Comprehensive Zod-based output schemas for all entity types and operations
+- ✅ **Type-Safe Validation**: Structured content validated against schemas ensuring data consistency
+- ✅ **Backward Compatibility**: All tools return both `content` and `structuredContent` for maximum compatibility
+- ✅ **Rich Metadata**: Enhanced structured content with operation success indicators and descriptive messages
+
 ## Project Structure
 
 ```

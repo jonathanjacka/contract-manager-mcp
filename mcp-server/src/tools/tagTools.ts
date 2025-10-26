@@ -1,11 +1,15 @@
 import type { ContractManagerMCP } from '../index.js';
 import { tagService, taskService } from '../services/index.js';
 import { assert } from '../utils/assert.js';
+import { z } from 'zod';
 import {
   tagCodeSchema,
   createTagInputSchema,
   updateTagInputSchema,
   tagTaskSchema,
+  tagListOutputSchema,
+  tagOutputSchema,
+  taskOutputSchema,
 } from '../schemas/schema.js';
 import {
   createText,
@@ -25,12 +29,22 @@ export function registerTagTools(agent: ContractManagerMCP) {
         readOnlyHint: true,
         openWorldHint: false,
       } satisfies ToolAnnotations,
+      outputSchema: tagListOutputSchema,
     },
     async () => {
       const tags = await tagService.getAll();
       const tagLinks = tags.map(createTagResourceLink);
+      const structuredContent = {
+        tags,
+        count: tags.length,
+      };
       return {
-        content: [createText(`Found ${tags.length} tags.`), ...tagLinks],
+        content: [
+          createText(`Found ${tags.length} tags.`),
+          ...tagLinks,
+          createText(structuredContent),
+        ],
+        structuredContent,
       };
     }
   );
@@ -45,12 +59,15 @@ export function registerTagTools(agent: ContractManagerMCP) {
         openWorldHint: false,
       } satisfies ToolAnnotations,
       inputSchema: tagCodeSchema,
+      outputSchema: { tag: z.object(tagOutputSchema) },
     },
     async ({ code }) => {
       const tag = await tagService.getByCode(code);
       assert(tag, `Tag with code "${code}" not found`);
+      const structuredContent = { tag };
       return {
-        content: [createTagEmbeddedResource(tag)],
+        content: [createTagEmbeddedResource(tag), createText(structuredContent)],
+        structuredContent,
       };
     }
   );
@@ -65,16 +82,20 @@ export function registerTagTools(agent: ContractManagerMCP) {
         openWorldHint: false,
       } satisfies ToolAnnotations,
       inputSchema: createTagInputSchema,
+      outputSchema: { tag: z.object(tagOutputSchema) },
     },
     async tagData => {
       const createdTag = await tagService.createWithCode(tagData);
+      const structuredContent = { tag: createdTag };
       return {
         content: [
           createText(
             `Tag "${createdTag.name}" created successfully with code "${createdTag.code}"`
           ),
           createTagEmbeddedResource(createdTag),
+          createText(structuredContent),
         ],
+        structuredContent,
       };
     }
   );
@@ -90,16 +111,20 @@ export function registerTagTools(agent: ContractManagerMCP) {
         openWorldHint: false,
       } satisfies ToolAnnotations,
       inputSchema: updateTagInputSchema,
+      outputSchema: { tag: z.object(tagOutputSchema) },
     },
     async ({ code, ...updates }) => {
       const existingTag = await tagService.getByCode(code);
       assert(existingTag, `Tag with code "${code}" not found`);
       const updatedTag = await tagService.updateByCode(code, updates);
+      const structuredContent = { tag: updatedTag };
       return {
         content: [
           createText(`Tag "${updatedTag.name}" (code: ${code}) updated successfully`),
           createTagEmbeddedResource(updatedTag),
+          createText(structuredContent),
         ],
+        structuredContent,
       };
     }
   );
@@ -113,16 +138,20 @@ export function registerTagTools(agent: ContractManagerMCP) {
         openWorldHint: false,
       } satisfies ToolAnnotations,
       inputSchema: tagCodeSchema,
+      outputSchema: { tag: z.object(tagOutputSchema) },
     },
     async ({ code }) => {
       const existingTag = await tagService.getByCode(code);
       assert(existingTag, `Tag with code "${code}" not found`);
       await tagService.deleteByCode(code);
+      const structuredContent = { tag: existingTag };
       return {
         content: [
           createText(`Tag "${existingTag.name}" (code: ${code}) deleted successfully`),
           createTagEmbeddedResource(existingTag),
+          createText(structuredContent),
         ],
+        structuredContent,
       };
     }
   );
@@ -138,6 +167,10 @@ export function registerTagTools(agent: ContractManagerMCP) {
         openWorldHint: false,
       } satisfies ToolAnnotations,
       inputSchema: tagTaskSchema,
+      outputSchema: {
+        tag: z.object(tagOutputSchema),
+        task: z.object(taskOutputSchema),
+      },
     },
     async ({ tag_code, task_code }) => {
       const tag = await tagService.getByCode(tag_code);
@@ -147,6 +180,7 @@ export function registerTagTools(agent: ContractManagerMCP) {
 
       await tagService.addToTask(tag_code, task_code);
 
+      const structuredContent = { tag, task };
       return {
         content: [
           createText(
@@ -154,7 +188,9 @@ export function registerTagTools(agent: ContractManagerMCP) {
           ),
           createTagEmbeddedResource(tag),
           createTaskEmbeddedResource(task),
+          createText(structuredContent),
         ],
+        structuredContent,
       };
     }
   );
@@ -170,6 +206,10 @@ export function registerTagTools(agent: ContractManagerMCP) {
         openWorldHint: false,
       } satisfies ToolAnnotations,
       inputSchema: tagTaskSchema,
+      outputSchema: {
+        tag: z.object(tagOutputSchema),
+        task: z.object(taskOutputSchema),
+      },
     },
     async ({ tag_code, task_code }) => {
       const tag = await tagService.getByCode(tag_code);
@@ -179,6 +219,7 @@ export function registerTagTools(agent: ContractManagerMCP) {
 
       await tagService.removeFromTask(tag_code, task_code);
 
+      const structuredContent = { tag, task };
       return {
         content: [
           createText(
@@ -186,7 +227,9 @@ export function registerTagTools(agent: ContractManagerMCP) {
           ),
           createTagEmbeddedResource(tag),
           createTaskEmbeddedResource(task),
+          createText(structuredContent),
         ],
+        structuredContent,
       };
     }
   );

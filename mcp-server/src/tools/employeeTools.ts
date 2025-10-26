@@ -1,12 +1,16 @@
 import type { ContractManagerMCP } from '../index.js';
 import { employeeService, taskService } from '../services/index.js';
 import { assert } from '../utils/assert.js';
+import { z } from 'zod';
 import {
   employeeCodeSchema,
   taskCodeSchema,
   createEmployeeInputSchema,
   updateEmployeeInputSchema,
   employeeTaskSchema,
+  employeeListOutputSchema,
+  employeeOutputSchema,
+  taskOutputSchema,
 } from '../schemas/schema.js';
 import {
   createText,
@@ -26,12 +30,22 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
         readOnlyHint: true,
         openWorldHint: false,
       } satisfies ToolAnnotations,
+      outputSchema: employeeListOutputSchema,
     },
     async () => {
       const employees = await employeeService.getAll();
       const employeeLinks = employees.map(createEmployeeResourceLink);
+      const structuredContent = {
+        employees,
+        count: employees.length,
+      };
       return {
-        content: [createText(`Found ${employees.length} employees.`), ...employeeLinks],
+        content: [
+          createText(`Found ${employees.length} employees.`),
+          ...employeeLinks,
+          createText(structuredContent),
+        ],
+        structuredContent,
       };
     }
   );
@@ -46,12 +60,15 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
         openWorldHint: false,
       } satisfies ToolAnnotations,
       inputSchema: employeeCodeSchema,
+      outputSchema: { employee: z.object(employeeOutputSchema) },
     },
     async ({ code }) => {
       const employee = await employeeService.getByCode(code);
       assert(employee, `Employee with code "${code}" not found`);
+      const structuredContent = { employee };
       return {
-        content: [createEmployeeEmbeddedResource(employee)],
+        content: [createEmployeeEmbeddedResource(employee), createText(structuredContent)],
+        structuredContent,
       };
     }
   );
@@ -66,16 +83,20 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
         openWorldHint: false,
       } satisfies ToolAnnotations,
       inputSchema: createEmployeeInputSchema,
+      outputSchema: { employee: z.object(employeeOutputSchema) },
     },
     async employeeData => {
       const createdEmployee = await employeeService.createWithCode(employeeData);
+      const structuredContent = { employee: createdEmployee };
       return {
         content: [
           createText(
             `Employee "${createdEmployee.name}" created successfully with code "${createdEmployee.code}"`
           ),
           createEmployeeEmbeddedResource(createdEmployee),
+          createText(structuredContent),
         ],
+        structuredContent,
       };
     }
   );
@@ -91,6 +112,10 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
         openWorldHint: false,
       } satisfies ToolAnnotations,
       inputSchema: employeeTaskSchema,
+      outputSchema: {
+        employee: z.object(employeeOutputSchema),
+        task: z.object(taskOutputSchema),
+      },
     },
     async ({ employee_code, task_code }) => {
       const employee = await employeeService.getByCode(employee_code);
@@ -100,6 +125,7 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
 
       await employeeService.addToTask(employee_code, task_code);
 
+      const structuredContent = { employee, task };
       return {
         content: [
           createText(
@@ -107,7 +133,9 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
           ),
           createEmployeeEmbeddedResource(employee),
           createTaskEmbeddedResource(task),
+          createText(structuredContent),
         ],
+        structuredContent,
       };
     }
   );
@@ -122,19 +150,32 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
         openWorldHint: false,
       } satisfies ToolAnnotations,
       inputSchema: taskCodeSchema,
+      outputSchema: {
+        task_code: z.string(),
+        task_name: z.string(),
+        ...employeeListOutputSchema,
+      },
     },
     async ({ code }) => {
       const task = await taskService.getByCode(code);
       assert(task, `Task with code "${code}" not found`);
       const employees = await employeeService.getByTaskCode(code);
       const employeeLinks = employees.map(createEmployeeResourceLink);
+      const structuredContent = {
+        task_code: code,
+        task_name: task.name,
+        employees,
+        count: employees.length,
+      };
       return {
         content: [
           createText(
             `Found ${employees.length} employees assigned to task "${task.name}" (${code}).`
           ),
           ...employeeLinks,
+          createText(structuredContent),
         ],
+        structuredContent,
       };
     }
   );
@@ -150,16 +191,20 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
         openWorldHint: false,
       } satisfies ToolAnnotations,
       inputSchema: updateEmployeeInputSchema,
+      outputSchema: { employee: z.object(employeeOutputSchema) },
     },
     async ({ code, ...updates }) => {
       const existingEmployee = await employeeService.getByCode(code);
       assert(existingEmployee, `Employee with code "${code}" not found`);
       const updatedEmployee = await employeeService.updateByCode(code, updates);
+      const structuredContent = { employee: updatedEmployee };
       return {
         content: [
           createText(`Employee "${updatedEmployee.name}" (code: ${code}) updated successfully`),
           createEmployeeEmbeddedResource(updatedEmployee),
+          createText(structuredContent),
         ],
+        structuredContent,
       };
     }
   );
@@ -173,16 +218,20 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
         openWorldHint: false,
       } satisfies ToolAnnotations,
       inputSchema: employeeCodeSchema,
+      outputSchema: { employee: z.object(employeeOutputSchema) },
     },
     async ({ code }) => {
       const existingEmployee = await employeeService.getByCode(code);
       assert(existingEmployee, `Employee with code "${code}" not found`);
       await employeeService.deleteByCode(code);
+      const structuredContent = { employee: existingEmployee };
       return {
         content: [
           createText(`Employee "${existingEmployee.name}" (code: ${code}) deleted successfully`),
           createEmployeeEmbeddedResource(existingEmployee),
+          createText(structuredContent),
         ],
+        structuredContent,
       };
     }
   );
@@ -198,6 +247,10 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
         openWorldHint: false,
       } satisfies ToolAnnotations,
       inputSchema: employeeTaskSchema,
+      outputSchema: {
+        employee: z.object(employeeOutputSchema),
+        task: z.object(taskOutputSchema),
+      },
     },
     async ({ employee_code, task_code }) => {
       const employee = await employeeService.getByCode(employee_code);
@@ -207,6 +260,7 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
 
       await employeeService.removeFromTask(employee_code, task_code);
 
+      const structuredContent = { employee, task };
       return {
         content: [
           createText(
@@ -214,7 +268,9 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
           ),
           createEmployeeEmbeddedResource(employee),
           createTaskEmbeddedResource(task),
+          createText(structuredContent),
         ],
+        structuredContent,
       };
     }
   );

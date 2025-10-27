@@ -20,12 +20,17 @@ export const HEALTH_RESPONSE = {
 export const getMcpInfoResponse = (port: number) => ({
   name: SERVER_INFO.displayName,
   version: SERVER_INFO.version,
-  protocol: 'Model Context Protocol (MCP)',
-  message: 'This is an MCP server endpoint. Use an MCP client to connect.',
+  protocol: 'Model Context Protocol (MCP) with Server-Sent Events',
+  message: 'This is an MCP server with SSE transport. Use an MCP client to connect.',
+  transport: 'Server-Sent Events (SSE)',
   usage: {
     'MCP Inspector': 'npx @modelcontextprotocol/inspector',
-    'Connection URL': `http://localhost:${port}/mcp`,
-    Method: 'POST with JSON-RPC 2.0 format',
+    'SSE Connection (Primary)': `http://localhost:${port}/mcp/sse`,
+    'SSE Connection (Inspector)': `http://localhost:${port}/sse`,
+    'Message Endpoint (Primary)': `http://localhost:${port}/mcp/messages`,
+    'Message Endpoint (Inspector)': `http://localhost:${port}/messages`,
+    'Connection Flow':
+      '1. GET /mcp/sse or /sse to establish SSE stream, 2. POST to /mcp/messages or /messages with X-Session-ID header',
   },
   capabilities: {
     tools: 0,

@@ -10,6 +10,8 @@
     "dev:http": "nodemon --exec tsx src/index-http.ts",
     "dev:sse:with-inspector": "concurrently \"npm run dev:sse\" \"npm run inspector:container\"",
     "dev:http:with-inspector": "concurrently \"npm run dev:http\" \"npm run inspector:container\"",
+    "dev:stdio": "tsx src/index-stdio.ts",
+    "dev:stdio:with-inspector": "concurrently \"npm run dev:stdio\" \"npm run inspector:container\"",
     "inspector:container": "HOST=0.0.0.0 npx @modelcontextprotocol/inspector",
     "clean": "rm -rf dist",
     "prebuild": "npm run clean",

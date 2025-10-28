@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "default-server": {
+      "type": "stdio",
+      "command": "npm",
+      "args": ["run", "dev:stdio"]
+    }
+  }
+}

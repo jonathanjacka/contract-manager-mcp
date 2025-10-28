@@ -1,25 +1,11 @@
 import { Router } from 'express';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { logger } from '../utils/logger.js';
-import { HEALTH_RESPONSE, getMcpInfoResponse, ERROR_CODES, SERVER_CONFIG } from '../constants.js';
-import type { ContractManagerMCP } from '../index.js';
+import { ERROR_CODES } from '../constants.js';
+import type { ContractManagerMCP } from '../contractManagerMCP.js';
 
-export function createRoutes(contractManagerMCP: ContractManagerMCP) {
+export function createStreamableHTTPRoutes(contractManagerMCP: ContractManagerMCP) {
   const router = Router();
-
-  router.get('/health', (_req, res) => {
-    res.json({
-      ...HEALTH_RESPONSE,
-      timestamp: new Date().toISOString(),
-    });
-  });
-
-  router.get('/mcp', (_req, res) => {
-    res.status(200).json({
-      ...getMcpInfoResponse(SERVER_CONFIG.getPort()),
-      timestamp: new Date().toISOString(),
-    });
-  });
 
   router.post('/mcp', async (req, res) => {
     const mcpMethod = req.body?.method || 'unknown';

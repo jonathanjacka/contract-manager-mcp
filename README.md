@@ -1,15 +1,8 @@
-# Contract Manager Ecosystem
+# MCP Server
 
-A comprehensive contract management system built with the Model Context Protocol (MCP), featuring an MCP server, authentication service, web UI, and MCP Inspector for development.
+The core Model Context Protocol server for the Contract Manager ecosystem. Built with Express.js and TypeScript, this service handles contract management operations and provides MCP endpoints for client applications.
 
-## Architecture
-
-This ecosystem consists of multiple services that work together:
-
-- **MCP Server** - Core contract management MCP server with HTTP transport
-- **Auth Server** - OAuth2 authentication service _(to do)_
-- **Web UI** - Frontend application with MCP UI components _(to do)_
-- **MCP Inspector** - Development and debugging tool for MCP protocol testing
+This service is part of the larger Contract Manager ecosystem. See the [root README](../README.md) for information about the full system.
 
 ## Changelog
 
@@ -32,34 +25,38 @@ This ecosystem consists of multiple services that work together:
 ### MCP Integration (v1.1.0)
 
 - ✅ **MCP Server Implementation**: Full Model Context Protocol server with StreamableHTTPServerTransport
-- ✅ **MCP Inspector Support**: Container-friendly inspector setup for MCP protocol development and testing
-- ✅ **Colored Logging System**: Organized logging utilities with chalk-based colored output
+- ✅ **MCP Inspector Support**: Container-friendly inspector setup with proper port forwarding (6274, 6277)
+- ✅ **Colored Logging**: Chalk-based logging system with organized logger utilities
 - ✅ **Constants Management**: Centralized server configuration and response templates
-- ✅ **Environment Variables**: Enhanced dotenv integration for proper configuration management
+- ✅ **Environment Variables**: dotenv integration for proper configuration management
+- ✅ **Minimal Server Structure**: Clean, testable server for MCP protocol development
+- ✅ **Container Inspector**: MCP Inspector running inside dev container with HOST=0.0.0.0 binding
 - ✅ **Modern TypeScript**: Updated to tsx for faster, cleaner TypeScript execution
-- ✅ **Dependency Cleanup**: Streamlined dependencies, keeping only essential packages for MCP development
-- ✅ **Container Networking**: Proper dev container port forwarding for MCP Inspector (6274, 6277)
+- ✅ **Dependency Cleanup**: Removed unused packages, kept only essential dependencies
 
 ### Database Implementation (v1.2.0)
 
-- ✅ **SQLite Database**: Lightweight, file-based database with contract management schema
+- ✅ **SQLite Database**: Lightweight, file-based database perfect for development
 - ✅ **Knex.js Integration**: TypeScript-first query builder with migrations and seeding
 - ✅ **Complete Schema**: Programs, Contracts, Tasks, Employees, Tags with proper relationships
 - ✅ **UUID Primary Keys**: All entities use UUIDs for unique identification
-- ✅ **Auto-initialization**: Database setup and seeding on every server startup
+- ✅ **Foreign Key Constraints**: Proper referential integrity with cascade deletes
+- ✅ **Audit Timestamps**: created_at and updated_at on all entities
+- ✅ **Rich Seed Data**: Realistic employee and project data for testing
 - ✅ **Service Layer**: Type-safe CRUD operations and relationship queries
-- ✅ **Rich Sample Data**: Realistic employee and project data for testing
+- ✅ **Auto-initialization**: Database setup and seeding on every server startup
 
 ### MCP Tools Implementation (v1.3.0)
 
 - ✅ **Friendly Code System**: Human-readable codes (E001, P001, C001, T001, TAG001) for all entities
-- ✅ **Database Triggers**: Auto-generation of friendly codes for new records
-- ✅ **List Tools**: Complete set of list tools for all entities (employees, programs, contracts, tasks, tags)
+- ✅ **Database Triggers**: Auto-generation of friendly codes with sequence counters
+- ✅ **List Tools**: Complete set of list tools for all entities with resource links
 - ✅ **Individual Get Tools**: Get specific entities by their friendly codes
 - ✅ **Resource Links**: Interactive resource links for easy navigation between entities
 - ✅ **Embedded Resources**: Full JSON data embedding for detailed entity information
 - ✅ **Zod Schema Validation**: Type-safe input validation for all MCP tool parameters
 - ✅ **Error Handling**: Proper error assertions with meaningful messages
+- ✅ **Clean Architecture**: Separated tools, schemas, middleware, and routes
 
 ### Comprehensive CRUD Operations (v1.4.0)
 
@@ -68,109 +65,132 @@ This ecosystem consists of multiple services that work together:
 - ✅ **Tag System**: Full tag management (create, edit, delete, apply to tasks, remove from tasks)
 - ✅ **Unique Validation**: Tag names must be unique across the system
 - ✅ **Relationship Management**: Proper handling of many-to-many relationships (employees-tasks, tags-tasks)
-- ✅ **Modular Architecture**: Organized tools by entity type for better maintainability
-- ✅ **Service Layer**: Dedicated service files for each entity with comprehensive operations
+- ✅ **Modular Architecture**: Organized tools by entity type in separate files for maintainability
+- ✅ **Service Layer Refactoring**: Dedicated service files for each entity with comprehensive operations
 - ✅ **Code-Based Operations**: All CRUD operations use friendly codes instead of UUIDs
+- ✅ **Cleanup Operations**: Delete operations properly handle relationship cleanup
 
 ### MCP Resources Implementation (v1.5.0)
 
 - ✅ **MCP Resources Capability**: Full implementation of MCP Resources specification
-- ✅ **List Resources**: 5 list resources providing bulk access to all entity types (employees, programs, contracts, tasks, tags)
-- ✅ **Template Resources**: 5 parameterized template resources for individual entity access with friendly code completion
-- ✅ **Resource Discovery**: Complete resource discovery with `list: undefined` to prevent resource bloat
-- ✅ **Intelligent Completion**: Code completion for all entity friendly codes (E001, P001, C001, T001, TAG001)
-- ✅ **Consistent URI Patterns**: Standardized `contract-manager://` scheme for all resources
-- ✅ **Modular Resource Architecture**: Organized resources by entity type in separate files
+- ✅ **List Resources**: 5 list resources providing bulk access to all entity types
+- ✅ **Template Resources**: 5 parameterized template resources for individual entity access
+- ✅ **Intelligent Completion**: Code completion for all entity friendly codes
+- ✅ **Resource Discovery**: Complete resource discovery with clean architecture
+- ✅ **URI Standardization**: Consistent `contract-manager://` scheme for all resources
+- ✅ **Modular Resource Files**: Organized resources by entity type with dedicated files
 - ✅ **Error Handling**: Consistent error handling using project's assert utility
+- ✅ **Resource Template Configuration**: Proper `list: undefined` to prevent resource bloat
 
 ### MCP Prompts Implementation (v1.6.0)
 
-- ✅ **MCP Prompts Capability**: Full implementation of MCP Prompts specification for structured AI interactions
-- ✅ **Contract Analysis Prompt**: Comprehensive contract analysis with tasks, team, and risk assessment
-- ✅ **Task Planning Prompt**: AI-powered task suggestions, breakdown, and planning recommendations
-- ✅ **Team Assignment Prompt**: Intelligent employee assignment suggestions based on skills and workload
-- ✅ **Progress Review Prompt**: Automated progress reports for contracts and programs with executive insights
-- ✅ **Tag Suggestions Prompt**: Smart tag recommendations for tasks with existing tag context
+- ✅ **MCP Prompts Capability**: Full implementation of MCP Prompts specification
+- ✅ **Contract Analysis Prompt**: Comprehensive analysis with tasks, team, risk assessment, and recommendations
+- ✅ **Task Planning Prompt**: AI-powered task suggestions, breakdown, dependencies, and resource planning
+- ✅ **Team Assignment Prompt**: Intelligent employee assignment based on skills, workload, and team composition
+- ✅ **Progress Review Prompt**: Automated reports for contracts and programs with executive-level insights
+- ✅ **Tag Suggestions Prompt**: Smart tag recommendations with existing tag context and creation workflow
 - ✅ **Intelligent Completion**: All prompts support code completion for entity references
-- ✅ **Rich Context Embedding**: Prompts include relevant data as embedded resources for AI analysis
-- ✅ **Modular Prompt Architecture**: Organized prompts by functionality in separate files
+- ✅ **Rich Context Embedding**: Prompts include comprehensive data as embedded resources
+- ✅ **Structured Instructions**: Clear, detailed business workflow guidance for AI analysis
+- ✅ **Modular Prompt Files**: Organized prompts by functionality with dedicated files
 
 ### MCP Annotations Implementation (v1.7.0)
 
 - ✅ **Tool Annotations**: Complete MCP ToolAnnotations implementation for all 21 tools with semantic behavior hints
 - ✅ **Resource Annotations**: MCP Annotations implementation for all 10 resources with priority and audience targeting
-- ✅ **Type-Safe Annotations**: Custom TypeScript types enforcing proper annotation combinations and defaults
-- ✅ **Read-Only Operations**: Proper `readOnlyHint: true` for all list/get operations (13 tools)
-- ✅ **Safe Operations**: `destructiveHint: false` for create/update operations with clear behavior indicators
+- ✅ **Type-Safe Annotations**: Custom TypeScript types (`ToolAnnotations`, `ResourceAnnotations`) enforcing proper combinations
+- ✅ **Read-Only Operations**: Proper `readOnlyHint: true` for all list/get operations (13 tools) with `openWorldHint: false`
+- ✅ **Safe Operations**: `destructiveHint: false` for create/update operations indicating additive-only changes
 - ✅ **Idempotent Operations**: `idempotentHint: true` for update and assignment operations that can be safely repeated
-- ✅ **Delete Operations**: Proper destructive operation handling with default `destructiveHint: true` for delete tools
-- ✅ **Closed-World System**: `openWorldHint: false` across all tools indicating self-contained contract management
-- ✅ **Resource Priorities**: Business-logic driven priority hierarchy (Programs: 1.0, Contracts: 0.9, Tasks: 0.8, Employees: 0.7, Tags: 0.5)
+- ✅ **Delete Operations**: Proper destructive operation handling with default `destructiveHint: true` for delete tools (3 tools)
+- ✅ **Closed-World System**: `openWorldHint: false` across all tools indicating self-contained contract management domain
+- ✅ **Resource Priority Hierarchy**: Business-logic driven priorities (Programs: 1.0, Contracts: 0.9, Tasks: 0.8, Employees: 0.7, Tags: 0.5)
 - ✅ **Audience Targeting**: All resources target both `user` and `assistant` audiences for comprehensive access
-- ✅ **Client Optimization**: Annotations enable smart context window management and tool selection by MCP clients
+- ✅ **Client Optimization**: Annotations enable smart context window management, tool selection, and safety warnings by MCP clients
 
 ### Structured Content Implementation (v1.8.0)
 
 - ✅ **MCP Structured Content**: Complete implementation of MCP structured content specification for all 21 tools
 - ✅ **Output Schemas**: Comprehensive Zod-based output schemas for all entity types and operations
+- ✅ **Backward Compatibility**: All tools return both `content` (for compatibility) and `structuredContent` (for type safety)
 - ✅ **Type-Safe Validation**: Structured content validated against schemas ensuring data consistency
-- ✅ **Backward Compatibility**: All tools return both `content` and `structuredContent` for maximum compatibility
+- ✅ **Collection Schemas**: Specialized schemas for list operations with count metadata
+- ✅ **Operation Result Schemas**: Standardized result schemas for create, update, delete, and assignment operations
 - ✅ **Rich Metadata**: Enhanced structured content with operation success indicators and descriptive messages
+- ✅ **Schema Consistency**: All structured content follows consistent patterns across the entire tool ecosystem
+- ✅ **Modular Architecture**: Annotations organized in centralized types file with consistent imports across all tool/resource files
 
 ## Project Structure
 
 ```
-contract-manager/
-├── .devcontainer/         # Dev container configuration (root level)
-├── docker-compose.yml     # Multi-service orchestration
-├── README.md             # This file
-└── mcp-server/           # MCP Server service
-    ├── src/              # TypeScript source code
-    │   ├── index.ts      # Main MCP server with HTTP transport
-    │   ├── constants.ts  # Centralized configuration
-    │   ├── tools/        # Modular MCP tools organized by entity
-    │   │   ├── index.ts           # Main tools orchestrator
-    │   │   ├── employeeTools.ts   # Employee CRUD operations
-    │   │   ├── taskTools.ts       # Task CRUD operations
-    │   │   ├── tagTools.ts        # Tag CRUD operations
-    │   │   ├── programTools.ts    # Program list/get operations
-    │   │   ├── contractTools.ts   # Contract list/get operations
-    │   │   └── utils.ts           # Shared utility functions
-    │   ├── services/     # Modular business logic and data access
-    │   │   ├── index.ts           # Service exports
-    │   │   ├── employeeService.ts # Employee data operations
-    │   │   ├── taskService.ts     # Task data operations
-    │   │   ├── tagService.ts      # Tag data operations
-    │   │   ├── programService.ts  # Program data operations
-    │   │   ├── contractService.ts # Contract data operations
-    │   │   └── database.ts        # Legacy service exports
-    │   ├── resources/    # MCP Resources for data access
-    │   │   ├── index.ts           # Resource registration
-    │   │   ├── employeeResources.ts # Employee list/template resources
-    │   │   ├── taskResources.ts     # Task list/template resources
-    │   │   ├── tagResources.ts      # Tag list/template resources
-    │   │   ├── programResources.ts  # Program list/template resources
-    │   │   └── contractResources.ts # Contract list/template resources
-    │   ├── prompts/      # MCP Prompts for AI interactions
-    │   │   ├── index.ts            # Prompt registration
-    │   │   ├── contractAnalysis.ts # Contract analysis prompt
-    │   │   ├── taskPlanning.ts     # Task planning prompt
-    │   │   ├── teamAssignment.ts   # Team assignment prompt
-    │   │   ├── progressReview.ts   # Progress review prompt
-    │   │   └── tagSuggestions.ts   # Tag suggestions prompt
-    │   ├── types/        # TypeScript type definitions
-    │   │   └── annotations.ts  # MCP annotation type definitions
-    │   ├── database/     # Database configuration and migrations
-    │   ├── schemas/      # Zod input validation schemas
-    │   ├── middleware/   # Express middleware
-    │   ├── routes/       # Express route handlers
-    │   └── utils/        # Logging and utility functions
-    ├── dist/             # Compiled JavaScript (generated)
-    ├── package.json      # Dependencies and MCP-focused scripts
-    ├── tsconfig.json     # TypeScript configuration
-    ├── Dockerfile        # Production Docker image
-    └── README.md         # MCP server specific documentation
+mcp-server/
+├── src/                    # TypeScript source code
+│   ├── index.ts           # Main MCP server with HTTP transport
+│   ├── constants.ts       # Centralized server configuration
+│   ├── tools/             # Modular MCP tools organized by entity
+│   │   ├── index.ts           # Main tools orchestrator
+│   │   ├── employeeTools.ts   # Employee CRUD operations
+│   │   ├── taskTools.ts       # Task CRUD operations
+│   │   ├── tagTools.ts        # Tag CRUD operations
+│   │   ├── programTools.ts    # Program list/get operations
+│   │   ├── contractTools.ts   # Contract list/get operations
+│   │   └── utils.ts           # Shared utility functions
+│   ├── services/          # Modular business logic and data access
+│   │   ├── index.ts           # Service exports
+│   │   ├── employeeService.ts # Employee data operations
+│   │   ├── taskService.ts     # Task data operations
+│   │   ├── tagService.ts      # Tag data operations
+│   │   ├── programService.ts  # Program data operations
+│   │   ├── contractService.ts # Contract data operations
+│   │   └── database.ts        # Legacy service exports
+│   ├── resources/         # MCP Resources for data access
+│   │   ├── index.ts           # Resource registration orchestrator
+│   │   ├── employeeResources.ts # Employee list/template resources
+│   │   ├── taskResources.ts     # Task list/template resources
+│   │   ├── tagResources.ts      # Tag list/template resources
+│   │   ├── programResources.ts  # Program list/template resources
+│   │   └── contractResources.ts # Contract list/template resources
+│   ├── prompts/           # MCP Prompts for AI interactions
+│   │   ├── index.ts            # Prompt registration orchestrator
+│   │   ├── contractAnalysis.ts # Contract analysis prompt
+│   │   ├── taskPlanning.ts     # Task planning prompt
+│   │   ├── teamAssignment.ts   # Team assignment prompt
+│   │   ├── progressReview.ts   # Progress review prompt
+│   │   └── tagSuggestions.ts   # Tag suggestions prompt
+│   ├── types/             # TypeScript type definitions
+│   │   ├── database.ts    # Database entity interfaces
+│   │   └── annotations.ts # MCP annotation type definitions
+│   ├── database/          # Database configuration and management
+│   │   ├── connection.ts  # Knex configuration and connection
+│   │   ├── migrations/    # Database schema migrations
+│   │   │   └── 001_create_initial_tables.ts
+│   │   └── seeds/         # Database seed data
+│   │       └── 001_initial_data.ts
+│   ├── schemas/           # Input validation schemas
+│   │   └── schema.ts      # Zod schemas for MCP tools
+│   ├── middleware/        # Express middleware
+│   ├── routes/            # Express route handlers
+│   └── utils/             # Logging and utility functions
+│       ├── logger.ts      # Colored logging with chalk
+│       └── assert.ts      # Error assertion utility
+├── public/                 # Static assets
+├── dist/                   # Compiled JavaScript (generated)
+├── node_modules/           # Dependencies (generated)
+├── package.json           # Node.js dependencies and MCP-focused scripts
+├── package-lock.json      # Dependency lock file
+├── tsconfig.json          # TypeScript configuration
+├── nodemon.json           # Nodemon configuration for hot reload
+├── .eslintrc.js           # ESLint configuration
+├── .prettierrc            # Prettier configuration
+├── .env                   # Environment variables (git-ignored)
+├── .gitignore             # Git ignore patterns
+├── Dockerfile             # Production Dockerfile
+├── .dockerignore          # Docker ignore file
+└── README.md              # This file
 ```
+
+**Note:** The dev container configuration (`.devcontainer/`) is located in the root directory of the Contract Manager project, not within the mcp-server folder.
 
 ## Getting Started
 
@@ -185,12 +205,11 @@ contract-manager/
 
    ```bash
    git clone <your-repo-url>
-   cd contract-manager/mcp-server
+   cd mcp-server
    code .
    ```
 
 2. **Open in Dev Container:**
-
    - Press `Ctrl+Shift+P` (or `Cmd+Shift+P` on Mac)
    - Type "Remote-Containers: Reopen in Container"
    - Wait for the container to build and dependencies to install
@@ -201,34 +220,35 @@ contract-manager/
    npm run dev
    ```
 
-4. **Access the services:**
-   - MCP Server: http://localhost:3000/mcp
+4. **Access the server:**
+   - Main API: http://localhost:3000
    - Health check: http://localhost:3000/health
-   - MCP Inspector: http://localhost:6274 (when running)
-
-**For detailed MCP server setup, scripts, and MCP Inspector usage, see the [mcp-server README](./mcp-server/README.md).**
+   - API info: http://localhost:3000/api
 
 ### Available Scripts
 
-**Core Development:**
+**Development:**
 
-- `npm run dev` - Start MCP server with hot reload
-- `npm run dev:with-inspector` - Start server and MCP Inspector together
-- `npm run build` - Build for production
-- `npm run start` - Start production server
+- `npm run dev` - Start development server with hot reload
+- `npm run dev:inspect` - Start with Node.js inspector for debugging
+- `npm run dev:with-inspector` - Start both server and MCP Inspector
 
 **MCP Inspector:**
 
-- `npm run inspector:container` - Start MCP Inspector for dev container
-- `npm run inspector:connect` - Start inspector and auto-connect to server
+- `npm run inspector:container` - Start MCP Inspector for dev container (HOST=0.0.0.0)
+- `npm run inspector:connect` - Start MCP Inspector and auto-connect to local server
+
+**Build & Production:**
+
+- `npm run build` - Build for production
+- `npm run start` - Start production server
 
 **Code Quality:**
 
 - `npm run lint` - Run ESLint
+- `npm run lint:fix` - Fix ESLint issues
 - `npm run format` - Format code with Prettier
-- `npm run type-check` - TypeScript type checking
-
-**For complete script documentation and MCP Inspector setup, see the [mcp-server README](./mcp-server/README.md).**
+- `npm run type-check` - Run TypeScript type checking
 
 ### Environment Configuration
 
@@ -279,6 +299,322 @@ To customize your environment:
 
 **Note:** The `.env` file is ignored by git to keep your local configuration private.
 
+## MCP Annotations
+
+The server implements comprehensive MCP annotations for both tools and resources, providing semantic information to help MCP clients make intelligent decisions about tool usage, resource prioritization, and context management.
+
+### Tool Annotations
+
+All 21 tools include semantic behavior annotations following the MCP ToolAnnotations specification:
+
+#### Annotation Types
+
+**Read-Only Operations** (13 tools):
+
+```typescript
+annotations: {
+  readOnlyHint: true,
+  openWorldHint: false,
+} satisfies ToolAnnotations
+```
+
+- All `list_*` and `get_*` tools
+- `get_tasks_by_contract`, `get_employee_by_task`
+- No environment modifications, safe for repeated execution
+
+**Create Operations** (3 tools):
+
+```typescript
+annotations: {
+  destructiveHint: false,
+  openWorldHint: false,
+} satisfies ToolAnnotations
+```
+
+- `create_task`, `add_employee`, `create_tag`
+- Additive operations that don't modify existing data
+
+**Update/Assignment Operations** (5 tools):
+
+```typescript
+annotations: {
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false,
+} satisfies ToolAnnotations
+```
+
+- `update_task`, `edit_employee`, `edit_tag`
+- `add_employee_to_task`, `add_tag_to_task`, `remove_employee_from_task`, `remove_tag_from_task`
+- Safe operations that can be repeated without additional side effects
+
+**Delete Operations** (3 tools):
+
+```typescript
+annotations: {
+  openWorldHint: false,
+} satisfies ToolAnnotations
+```
+
+- `delete_task`, `delete_employee`, `delete_tag`
+- Uses default `destructiveHint: true` to warn about destructive nature
+
+#### Type Safety
+
+The `ToolAnnotations` type enforces proper annotation combinations:
+
+```typescript
+export type ToolAnnotations = {
+  openWorldHint?: false; // Closed-world system
+} & (
+  | {
+      readOnlyHint: true; // Read-only: no other annotations allowed
+    }
+  | {
+      destructiveHint?: false; // Only allow explicit false
+      idempotentHint?: true; // Only allow explicit true
+    }
+);
+```
+
+### Resource Annotations
+
+All 10 resources include priority and audience annotations:
+
+#### Priority Hierarchy
+
+Resources are prioritized based on business importance:
+
+- **Priority 1.0** (Critical): Programs - Top-level organizational units
+- **Priority 0.9** (Very High): Contracts - Core business agreements
+- **Priority 0.8** (High): Tasks - Operational work items
+- **Priority 0.7** (Medium-High): Employees - Human resource information
+- **Priority 0.5** (Medium): Tags - Categorization metadata
+
+#### Audience Targeting
+
+All resources target both audiences:
+
+```typescript
+annotations: {
+  audience: ['user', 'assistant'],
+  priority: 0.9, // Example priority
+} satisfies ResourceAnnotations
+```
+
+#### Type Safety
+
+The `ResourceAnnotations` type ensures consistent structure:
+
+```typescript
+export type ResourceAnnotations = {
+  audience?: ('user' | 'assistant')[];
+  priority?: number; // 0 (least important) to 1 (most important)
+  lastModified?: string; // ISO 8601 format
+};
+```
+
+### Client Benefits
+
+Annotations enable MCP clients to:
+
+1. **Smart Tool Selection**: Understand tool behavior before execution
+2. **Safety Warnings**: Alert users about destructive operations
+3. **Context Optimization**: Prioritize resources in limited context windows
+4. **Idempotent Operations**: Safely retry update operations
+5. **Audience Filtering**: Show relevant resources to appropriate users
+6. **Performance Optimization**: Cache read-only operations
+
+### Implementation Pattern
+
+All tools and resources follow consistent annotation patterns:
+
+```typescript
+// Tool example
+agent.server.registerTool(
+  'tool_name',
+  {
+    title: 'Tool Title',
+    description: 'Tool description',
+    annotations: {
+      readOnlyHint: true,
+      openWorldHint: false,
+    } satisfies ToolAnnotations,
+    inputSchema: schema,
+  },
+  handler
+);
+
+// Resource example
+agent.server.registerResource(
+  'resource_name',
+  'uri',
+  {
+    title: 'Resource Title',
+    description: 'Resource description',
+    annotations: {
+      audience: ['user', 'assistant'],
+      priority: 0.8,
+    } satisfies ResourceAnnotations,
+  },
+  handler
+);
+```
+
+## Database Schema
+
+The server uses a SQLite database with a comprehensive contract management schema:
+
+### Core Entities
+
+- **Programs**: Top-level organizational units with assigned managers
+- **Contracts**: Specific agreements tied to programs
+- **Tasks**: Individual work items within contracts with completion tracking (0-10 scale)
+- **Employees**: Team members with roles and contact information
+- **Tags**: Flexible categorization system for tasks
+
+### Relationships
+
+- Programs have exactly one manager (Employee) and can contain multiple Contracts
+- Contracts belong to one Program and can contain multiple Tasks
+- Tasks belong to one Contract and can be assigned to multiple Employees
+- Tasks can have multiple Tags for categorization
+- All entities include audit timestamps (created_at, updated_at)
+
+### Database Features
+
+- **Auto-initialization**: Database is created and seeded on every server startup
+- **Friendly Codes**: Human-readable codes (E001, P001, C001, etc.) for easy identification
+- **UUID Primary Keys**: All entities use UUIDs for unique identification
+- **Foreign Key Constraints**: Proper referential integrity with cascade deletes
+- **Database Triggers**: Auto-generation of friendly codes for new records
+- **Type Safety**: Full TypeScript interfaces for all entities and operations
+- **Service Layer**: Clean CRUD operations via `services/database.ts`
+
+### Sample Data
+
+The database includes realistic sample data with:
+
+- **5 employees** with friendly codes E001-E005 (Leia, Luke, Padmé, Han, Rey)
+- **2 programs** with codes P001-P002 representing different business initiatives
+- **3 contracts** with codes C001-C003 under active management
+- **7 tasks** with codes T001-T007 and varying completion levels
+- **8 tags** with codes TAG001-TAG008 for task categorization
+
+All entities use friendly codes for easy reference in MCP tools.
+
+## MCP Structured Content
+
+The server implements comprehensive structured content support following the MCP specification, providing both human-readable text content and machine-readable JSON data for all tool responses.
+
+### Output Schema Design
+
+All tools include `outputSchema` definitions using Zod for type-safe validation:
+
+**Entity Schemas:**
+
+```typescript
+// Individual entity schemas
+const taskOutputSchema = {
+  id: z.string(),
+  code: z.string(),
+  name: z.string(),
+  completion_value: z.number(),
+  contract_id: z.string(),
+  created_at: z.date(),
+  updated_at: z.date(),
+};
+
+// Collection schemas with metadata
+const taskListOutputSchema = {
+  tasks: z.array(z.object(taskOutputSchema)),
+  count: z.number(),
+};
+```
+
+**Operation Result Schemas:**
+
+```typescript
+// Standardized operation results
+const createResultSchema = {
+  success: z.boolean(),
+  created: z.boolean().default(true),
+  message: z.string(),
+};
+
+const updateResultSchema = {
+  success: z.boolean(),
+  updated: z.boolean().default(true),
+  message: z.string(),
+};
+```
+
+### Tool Response Pattern
+
+Every tool follows a consistent pattern returning both content types:
+
+```typescript
+// Example from create_task tool
+return {
+  content: [
+    createText(`Task "${createdTask.name}" created successfully`),
+    createTaskEmbeddedResource(createdTask),
+  ],
+  structuredContent: {
+    task: createdTask,
+    success: true,
+    created: true,
+    message: `Task "${createdTask.name}" created successfully with code "${createdTask.code}"`,
+  },
+};
+```
+
+### Schema Categories
+
+**List Operations** (5 tools):
+
+- Return collections with `{ entities: Entity[], count: number }`
+- Enable pagination and bulk processing
+- Provide comprehensive entity metadata
+
+**Individual Get Operations** (5 tools):
+
+- Return single entities with `{ entity: Entity }`
+- Include full entity details and relationships
+- Support deep entity inspection
+
+**Create Operations** (3 tools):
+
+- Return created entity plus operation metadata
+- Include success indicators and descriptive messages
+- Support workflow automation
+
+**Update Operations** (3 tools):
+
+- Return updated entity with change confirmation
+- Include success status and operation details
+- Enable idempotent operations
+
+**Delete Operations** (3 tools):
+
+- Return deleted entity for audit purposes
+- Include deletion confirmation and metadata
+- Support rollback scenarios
+
+**Assignment Operations** (2 tools):
+
+- Return both entities involved in relationship
+- Include assignment status and operation success
+- Support complex relationship management
+
+### Benefits
+
+- **Type Safety**: Clients can validate responses against schemas
+- **Better Integration**: Programming languages can generate types from schemas
+- **Rich Metadata**: Additional context beyond basic entity data
+- **Backward Compatibility**: Maintains text content for existing clients
+- **Tool Automation**: Enables sophisticated automated workflows
+
 ## API Endpoints
 
 ### Health & Info
@@ -290,37 +626,19 @@ To customize your environment:
 
 - `POST /mcp` - MCP JSON-RPC endpoint for Model Context Protocol requests
 
-### Database
+### Capabilities
 
-The MCP server includes a complete contract management database with:
+Current MCP server capabilities:
 
-- **Programs**, **Contracts**, **Tasks**, **Employees**, and **Tags**
-- **Friendly codes** (E001, P001, C001, T001, TAG001) for human-readable entity identification
-- **UUID primary keys** and proper foreign key relationships
-- **Automatic seeding** with sample data on server startup
-- **Type-safe service layer** for all data operations
-- **Database triggers** for auto-generating friendly codes on new records
-
-### MCP Tools
-
-The server provides comprehensive MCP tools for contract management with full MCP annotations for optimal client behavior:
-
-**Tool Annotations Features:**
-
-- **Behavior Hints**: All tools include semantic annotations (`readOnlyHint`, `destructiveHint`, `idempotentHint`, `openWorldHint`)
-- **Type Safety**: Custom `ToolAnnotations` type enforces proper annotation combinations
-- **Client Optimization**: Annotations help MCP clients with tool selection, context management, and safety warnings
-- **Closed-World System**: All tools marked with `openWorldHint: false` indicating self-contained operations
-
-**List Tools** (Read-Only):
+**List Tools (5):**
 
 - `list_employees` - List all employees with their roles and departments
 - `list_programs` - List all programs with descriptions
-- `list_contracts` - List all contracts with status and values
-- `list_tasks` - List all tasks with completion status
+- `list_contracts` - List all contracts with status information
+- `list_tasks` - List all tasks with completion levels
 - `list_tags` - List all tags for categorization
 
-**Individual Get Tools** (Read-Only):
+**Individual Get Tools (5):**
 
 - `get_employee` - Get specific employee by code (e.g., E001)
 - `get_program` - Get specific program by code (e.g., P001)
@@ -328,138 +646,454 @@ The server provides comprehensive MCP tools for contract management with full MC
 - `get_task` - Get specific task by code (e.g., T001)
 - `get_tag` - Get specific tag by code (e.g., TAG001)
 
-**Task Management Tools** (Mixed Operations):
+**Task Management Tools (4):**
 
-- `create_task` - Create new tasks with completion tracking (Safe: `destructiveHint: false`)
-- `update_task` - Update task details and completion status (Safe & Idempotent: `destructiveHint: false, idempotentHint: true`)
-- `delete_task` - Remove tasks (Destructive: default `destructiveHint: true`)
-- `get_tasks_by_contract` - List all tasks for a specific contract (Read-Only)
+- `create_task` - Create new tasks with completion tracking (0-10 scale)
+- `update_task` - Update task details and completion status
+- `delete_task` - Remove tasks (automatically cleans up relationships)
+- `get_tasks_by_contract` - List all tasks for a specific contract
 
-**Employee Management Tools** (Mixed Operations):
+**Employee Management Tools (6):**
 
-- `add_employee` - Create new employees with roles and contact info (Safe: `destructiveHint: false`)
-- `edit_employee` - Update employee information (Safe & Idempotent: `destructiveHint: false, idempotentHint: true`)
-- `delete_employee` - Remove employees (Destructive: default `destructiveHint: true`)
-- `add_employee_to_task` - Assign employees to tasks (Safe & Idempotent: `destructiveHint: false, idempotentHint: true`)
-- `remove_employee_from_task` - Remove employee assignments (Safe & Idempotent: `destructiveHint: false, idempotentHint: true`)
-- `get_employee_by_task` - List all employees assigned to a task (Read-Only)
+- `add_employee` - Create new employees with roles and contact information
+- `edit_employee` - Update employee information (name, job title, email)
+- `delete_employee` - Remove employees (automatically cleans up task assignments)
+- `add_employee_to_task` - Assign employees to tasks
+- `remove_employee_from_task` - Remove employee assignments from tasks
+- `get_employee_by_task` - List all employees assigned to a specific task
 
-**Tag Management Tools** (Mixed Operations):
+**Tag Management Tools (5):**
 
-- `create_tag` - Create new tags with unique names (Safe: `destructiveHint: false`)
-- `edit_tag` - Update tag information (Safe & Idempotent: `destructiveHint: false, idempotentHint: true`)
-- `delete_tag` - Remove tags (Destructive: default `destructiveHint: true`)
-- `add_tag_to_task` - Apply tags to tasks for categorization (Safe & Idempotent: `destructiveHint: false, idempotentHint: true`)
-- `remove_tag_from_task` - Remove tag assignments from tasks (Safe & Idempotent: `destructiveHint: false, idempotentHint: true`)
+- `create_tag` - Create new tags with unique names
+- `edit_tag` - Update tag information (names must remain unique)
+- `delete_tag` - Remove tags (automatically cleans up task relationships)
+- `add_tag_to_task` - Apply tags to tasks for categorization
+- `remove_tag_from_task` - Remove tag assignments from tasks
 
-### MCP Resources
+**Total: 25 MCP Tools**
 
-The server provides comprehensive MCP Resources for efficient data access with priority-based annotations:
+**MCP Resources (10 total):**
 
-**Resource Annotations Features:**
+**List Resources (5):**
 
-- **Priority Hierarchy**: Business-logic driven priorities from 0.5 to 1.0 for context window optimization
-- **Audience Targeting**: All resources target both `user` and `assistant` for comprehensive access
-- **Type Safety**: Custom `ResourceAnnotations` type ensures consistent annotation structure
-- **Client Optimization**: Annotations help clients prioritize resources in context-limited scenarios
+- `employees` - All employees in the database (`contract-manager://employees`)
+- `programs` - All programs in the database (`contract-manager://programs`)
+- `contracts` - All contracts in the database (`contract-manager://contracts`)
+- `tasks` - All tasks in the database (`contract-manager://tasks`)
+- `tags` - All tags in the database (`contract-manager://tags`)
 
-**Resource Priority Levels:**
+**Template Resources (5):**
 
-- **Priority 1.0** (Critical): Programs - Top-level organizational units
-- **Priority 0.9** (Very High): Contracts - Core business agreements
-- **Priority 0.8** (High): Tasks - Operational work items
-- **Priority 0.7** (Medium-High): Employees - Human resource information
-- **Priority 0.5** (Medium): Tags - Categorization and filtering metadata
-
-**List Resources (5 total):**
-
-- `employees` - All employees currently in the database (`contract-manager://employees`)
-- `programs` - All programs currently in the database (`contract-manager://programs`)
-- `contracts` - All contracts currently in the database (`contract-manager://contracts`)
-- `tasks` - All tasks currently in the database (`contract-manager://tasks`)
-- `tags` - All tags currently in the database (`contract-manager://tags`)
-
-**Template Resources (5 total):**
-
-- `employee` - Individual employee by code (`contract-manager://employees/{code}`, e.g., `contract-manager://employees/E001`)
-- `program` - Individual program by code (`contract-manager://programs/{code}`, e.g., `contract-manager://programs/P001`)
-- `contract` - Individual contract by code (`contract-manager://contracts/{code}`, e.g., `contract-manager://contracts/C001`)
-- `task` - Individual task by code (`contract-manager://tasks/{code}`, e.g., `contract-manager://tasks/T001`)
-- `tag` - Individual tag by code (`contract-manager://tags/{code}`, e.g., `contract-manager://tags/TAG001`)
+- `employee` - Individual employee by code (`contract-manager://employees/{code}`)
+- `program` - Individual program by code (`contract-manager://programs/{code}`)
+- `contract` - Individual contract by code (`contract-manager://contracts/{code}`)
+- `task` - Individual task by code (`contract-manager://tasks/{code}`)
+- `tag` - Individual tag by code (`contract-manager://tags/{code}`)
 
 **Resource Features:**
 
-- **Intelligent Completion**: All template resources provide code completion for friendly codes
-- **Resource Discovery**: List resources enable bulk access to entity data
-- **Clean Architecture**: Template resources use `list: undefined` to prevent resource bloat
-- **Consistent URI Patterns**: Standardized `contract-manager://` scheme across all resources
-- **Type Safety**: Full TypeScript integration with existing service layer
+- **Intelligent Completion**: Template resources provide code completion for friendly codes (E001, P001, C001, T001, TAG001)
+- **Bulk Access**: List resources enable efficient access to all entities of a type
+- **Parameterized URIs**: Template resources support dynamic code parameters with validation
+- **Resource Discovery**: Clean resource architecture with `list: undefined` to prevent bloat
+- **Consistent Patterns**: Standardized `contract-manager://` URI scheme across all resources
+- **Type Safety**: Full TypeScript integration with service layer and error handling
 
-### MCP Prompts
-
-The server provides intelligent MCP Prompts for AI-powered contract management workflows:
-
-**Available Prompts (5 total):**
+**MCP Prompts (5 total):**
 
 - `contract_analysis` - Comprehensive contract analysis with tasks, team, and risk assessment
-- `task_planning` - AI-powered task suggestions, breakdown, and planning recommendations
-- `team_assignment` - Intelligent employee assignment suggestions based on skills and context
-- `progress_review` - Automated progress reports for contracts (by code) or programs (by code)
+- `task_planning` - AI-powered task suggestions, breakdown, dependencies, and resource planning
+- `team_assignment` - Intelligent employee assignment based on skills and team composition
+- `progress_review` - Automated progress reports for contracts (type: contract) or programs (type: program)
 - `suggest_tags` - Smart tag recommendations for tasks with existing tag context
 
 **Prompt Features:**
 
-- **Intelligent Completion**: All prompts support code completion for entity references (contracts, tasks, etc.)
-- **Rich Context**: Prompts embed relevant data as resources for comprehensive AI analysis
-- **Structured Instructions**: Clear, detailed instructions for specific business workflows
-- **Tool Integration**: Prompts suggest using existing MCP tools for implementing recommendations
-- **Executive Insights**: Progress reviews provide stakeholder-ready analysis and metrics
+- **Intelligent Completion**: All prompts support code completion for entity references
+- **Rich Context**: Prompts embed comprehensive data as resources for AI analysis
+- **Structured Instructions**: Clear business workflow guidance with specific deliverables
+- **Tool Integration**: Prompts suggest using existing MCP tools to implement recommendations
+- **Executive Insights**: Progress reviews provide stakeholder-ready metrics and analysis
 
-### Future Services
+**Tool Features:**
 
-- **Auth Server** - OAuth2 authentication endpoints _(to do)_
-- **Web UI** - Frontend application with MCP integration _(to do)_
+**Resource Features:**
 
-**For detailed database schema, API documentation, and MCP capabilities, see the [mcp-server README](./mcp-server/README.md).**
+- **Intelligent Completion**: Template resources provide code completion for friendly codes (E001, P001, C001, T001, TAG001)
+- **Bulk Access**: List resources enable efficient access to all entities of a type
+- **Parameterized URIs**: Template resources support dynamic code parameters with validation
+- **Resource Discovery**: Clean resource architecture with `list: undefined` to prevent bloat
+- **Consistent Patterns**: Standardized `contract-manager://` URI scheme across all resources
+- **Type Safety**: Full TypeScript integration with service layer and error handling
 
-## Development Container Features
+**Features:**
+
+- Human-readable friendly codes for all entities
+- Interactive resource links for navigation
+- Full JSON embedding for detailed information
+- Type-safe input validation with Zod schemas
+- Comprehensive error handling
+- Modular architecture organized by entity type
+- Complete CRUD operations for tasks, employees, and tags
+- Relationship management with automatic cleanup
+- Unique constraint validation (e.g., tag names)
+
+## MCP Tool Examples
+
+### List Tool Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "list_employees"
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "Found 5 employees."
+      },
+      {
+        "type": "resource_link",
+        "uri": "contract-manager://employees/E001",
+        "name": "E001: Leia Organa",
+        "description": "Employee: \"Leia Organa\" - Senior Project Manager",
+        "mimeType": "application/json"
+      },
+      {
+        "type": "resource_link",
+        "uri": "contract-manager://employees/E002",
+        "name": "E002: Luke Skywalker",
+        "description": "Employee: \"Luke Skywalker\" - Lead Developer",
+        "mimeType": "application/json"
+      }
+    ]
+  }
+}
+```
+
+### Get Tool Example
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "get_employee",
+    "arguments": {
+      "code": "E001"
+    }
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "content": [
+      {
+        "type": "resource",
+        "resource": {
+          "uri": "contract-manager://employees/E001",
+          "mimeType": "application/json",
+          "text": "{\"id\":\"550e8400-e29b-41d4-a716-446655440001\",\"code\":\"E001\",\"name\":\"Leia Organa\",\"job_title\":\"Senior Project Manager\",\"email\":\"leia.organa@rebellion.com\",\"created_at\":\"2025-01-20T...\",\"updated_at\":\"2025-01-20T...\"}"
+        }
+      }
+    ]
+  }
+}
+```
+
+## MCP Resource Examples
+
+### List Resource Example
+
+**Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "resources/read",
+  "params": {
+    "uri": "contract-manager://employees"
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "contents": [
+      {
+        "mimeType": "application/json",
+        "text": "[{\"id\":\"550e8400-e29b-41d4-a716-446655440001\",\"code\":\"E001\",\"name\":\"Leia Organa\",\"job_title\":\"Senior Project Manager\",\"email\":\"leia.organa@rebellion.com\"},{\"id\":\"550e8400-e29b-41d4-a716-446655440002\",\"code\":\"E002\",\"name\":\"Luke Skywalker\",\"job_title\":\"Lead Developer\",\"email\":\"luke.skywalker@rebellion.com\"}]",
+        "uri": "contract-manager://employees"
+      }
+    ]
+  }
+}
+```
+
+### Template Resource Example
+
+**Request (with completion):**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "completion/complete",
+  "params": {
+    "ref": {
+      "type": "resource",
+      "uri": "contract-manager://employees/E0"
+    },
+    "argument": {
+      "name": "code",
+      "value": "E0"
+    }
+  }
+}
+```
+
+**Completion Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "completion": {
+      "values": ["E001", "E002", "E003", "E004", "E005"]
+    }
+  }
+}
+```
+
+**Resource Read Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "resources/read",
+  "params": {
+    "uri": "contract-manager://employees/E001"
+  }
+}
+```
+
+**Resource Read Response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "contents": [
+      {
+        "mimeType": "application/json",
+        "text": "{\"id\":\"550e8400-e29b-41d4-a716-446655440001\",\"code\":\"E001\",\"name\":\"Leia Organa\",\"job_title\":\"Senior Project Manager\",\"email\":\"leia.organa@rebellion.com\",\"created_at\":\"2025-01-20T...\",\"updated_at\":\"2025-01-20T...\"}",
+        "uri": "contract-manager://employees/E001"
+      }
+    ]
+  }
+}
+```
+
+## MCP Prompt Examples
+
+### Contract Analysis Prompt
+
+**Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "prompts/get",
+  "params": {
+    "name": "contract_analysis",
+    "arguments": {
+      "contractCode": "C001"
+    }
+  }
+}
+```
+
+**Response:** Returns a structured prompt with contract data, tasks, employees, and instructions for comprehensive analysis including risk assessment, team performance, and actionable recommendations.
+
+### Task Planning Prompt
+
+**Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "prompts/get",
+  "params": {
+    "name": "task_planning",
+    "arguments": {
+      "contractCode": "C001"
+    }
+  }
+}
+```
+
+**Response:** Returns a structured prompt with contract context, existing tasks, and team data, with instructions for AI to suggest missing tasks, dependencies, and resource planning.
+
+### Progress Review Prompt
+
+**Request (Contract Review):**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "prompts/get",
+  "params": {
+    "name": "progress_review",
+    "arguments": {
+      "type": "contract",
+      "code": "C001"
+    }
+  }
+}
+```
+
+**Request (Program Review):**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "prompts/get",
+  "params": {
+    "name": "progress_review",
+    "arguments": {
+      "type": "program",
+      "code": "P001"
+    }
+  }
+}
+```
+
+**Response:** Returns executive-level progress analysis with financial status, timeline analysis, risk assessment, and strategic recommendations.
+
+### Tag Suggestions Prompt
+
+**Request:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 5,
+  "method": "prompts/get",
+  "params": {
+    "name": "suggest_tags",
+    "arguments": {
+      "taskCode": "T001"
+    }
+  }
+}
+```
+
+**Response:** Returns task context with available tags and instructions for AI to suggest relevant categorization tags, with guidance to use MCP tools for tag creation and assignment.
+
+## MCP Inspector Setup
+
+### Running in Dev Container
+
+The MCP Inspector is configured to run inside the dev container with proper networking:
+
+```bash
+# Start MCP Inspector (container-friendly)
+npm run inspector:container
+
+# Or run directly with environment variable
+HOST=0.0.0.0 npx @modelcontextprotocol/inspector
+```
+
+### Accessing the Inspector
+
+1. **Start the Inspector** (it will show a URL with auth token)
+2. **Open in browser**: `http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=<token>`
+3. **Manual auth setup** (if needed):
+   - Click "Configuration" in the Inspector UI
+   - Find "Proxy Session Token"
+   - Enter the token from the terminal output
+   - Click "Save"
+
+### Connecting to Your Server
+
+In the MCP Inspector UI:
+
+- **Transport**: Streamable HTTP
+- **Server URL**: `http://localhost:3000/mcp`
+- Click "Connect"
+
+**Note**: If you get connection issues, you may need to manually add the proxy auth token to the Inspector UI configuration.
+
+### Troubleshooting
+
+**Inspector UI spinning/not loading:**
+
+- Ensure you're using `npm run inspector:container` in the dev container
+- Check that ports 6274 and 6277 are forwarded in your devcontainer.json
+- Try manually entering the proxy auth token in the Inspector configuration
+
+**Can't connect to MCP server:**
+
+- Verify your MCP server is running on `http://localhost:3000/mcp`
+- Use "Streamable HTTP" transport type
+- Check the browser console for CORS or network errors
+
+### Development Container Features
 
 The dev container includes:
 
-- **Node.js 22** runtime with modern TypeScript support
-- **Development tools** pre-installed (ESLint, Prettier, TypeScript)
-- **VS Code extensions** for TypeScript, ESLint, Prettier
+- Node.js 22 runtime
+- TypeScript and development tools pre-installed
+- VS Code extensions for TypeScript, ESLint, Prettier
 - **Port forwarding**:
   - `3000` - MCP Server
   - `6274` - MCP Inspector UI
   - `6277` - MCP Inspector Proxy
   - `9229` - Node.js debugging
-- **Git configuration** and Zsh with Oh My Zsh
-- **MCP Inspector** configured for container networking
-
-**For detailed dev container setup and MCP Inspector configuration, see the [mcp-server README](./mcp-server/README.md).**
+- Git configuration
+- Zsh with Oh My Zsh
 
 ## Production Deployment
 
-### MCP Server
-
-Build and run the MCP server:
+Build the production Docker image:
 
 ```bash
-cd mcp-server
-docker build -t contract-manager-mcp .
-docker run -p 3000:3000 contract-manager-mcp
+docker build -t mcp-server .
+docker run -p 3000:3000 mcp-server
 ```
-
-### Multi-Service Deployment
-
-Use Docker Compose for the full ecosystem:
-
-```bash
-docker-compose up --build
-```
-
-**For detailed deployment instructions and environment configuration, see the [mcp-server README](./mcp-server/README.md).**
 
 ## Contributing
 

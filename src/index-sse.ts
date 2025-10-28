@@ -13,6 +13,6 @@ startServer({
   createBaseRoutes,
   createTransportRoutes: createSSERoutes,
   mode: 'sse',
-  logMessages: ['🔗 SSE Transport Mode - Use MCP Inspector with SSE transport'],
+  logMessages: ['SSE Transport Mode - Use MCP Inspector with SSE transport'],
   endpoint: '/sse',
 });

@@ -14,7 +14,7 @@ startServer({
   createTransportRoutes: createStreamableHTTPRoutes,
   mode: 'http',
   logMessages: [
-    '📡 Streamable HTTP Transport Mode - Use MCP Inspector with Streamable HTTP transport',
+    'Streamable HTTP Transport Mode - Use MCP Inspector with Streamable HTTP transport',
   ],
   endpoint: '/mcp',
 });

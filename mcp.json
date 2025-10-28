@@ -4,6 +4,14 @@
       "type": "stdio",
       "command": "npm",
       "args": ["run", "dev:stdio"]
+    },
+    "sse-server": {
+      "type": "sse",
+      "url": "http://localhost:3000/sse"
+    },
+    "http-server": {
+      "type": "streamable-http",
+      "url": "http://localhost:3000/mcp"
     }
   }
 }

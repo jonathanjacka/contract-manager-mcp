@@ -1,6 +1,10 @@
+import chalk from 'chalk';
 import { config } from 'dotenv';
 import { ContractManagerMCP } from './contractManagerMCP.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+
+// Reminder: Safe logging to stderr will not interfere with Inspector stdio transport
+console.error(chalk.green('[MCP STDIO] Starting MCP server in stdio mode...'));
 
 config();
 
@@ -20,7 +24,6 @@ async function start() {
   };
 
   await contractManagerMCP.server.connect(transport);
-  // No need to call transport.start(); connect() already does this.
 }
 
 start();

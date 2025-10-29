@@ -2,8 +2,8 @@
   "mcpServers": {
     "default-server": {
       "type": "stdio",
-      "command": "npm",
-      "args": ["run", "dev:stdio"]
+      "command": "tsx",
+      "args": ["src/index-stdio.ts"]
     },
     "sse-server": {
       "type": "sse",

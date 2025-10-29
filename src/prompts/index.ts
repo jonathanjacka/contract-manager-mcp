@@ -1,4 +1,4 @@
-import type { ContractManagerMCP } from '../index.ts';
+import type { ContractManagerMCP } from '../contractManagerMCP.js';
 import { registerContractAnalysisPrompt } from './contractAnalysis';
 import { registerTaskPlanningPrompt } from './taskPlanning';
 import { registerTeamAssignmentPrompt } from './teamAssignment';

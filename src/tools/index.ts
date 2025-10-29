@@ -1,4 +1,4 @@
-import type { ContractManagerMCP } from '../index.js';
+import type { ContractManagerMCP } from '../contractManagerMCP.js';
 import { registerEmployeeTools } from './employeeTools.js';
 import { registerTaskTools } from './taskTools.js';
 import { registerTagTools } from './tagTools.js';

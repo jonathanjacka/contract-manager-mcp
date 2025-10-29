@@ -1,5 +1,5 @@
 import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ContractManagerMCP } from '../index.js';
+import type { ContractManagerMCP } from '../contractManagerMCP.js';
 import { programService } from '../services/index.js';
 import { assert } from '../utils/assert.js';
 import type { ResourceAnnotations } from '../types/annotations.js';

@@ -1,6 +1,6 @@
 import { completable } from '@modelcontextprotocol/sdk/server/completable.js';
 import { z } from 'zod';
-import type { ContractManagerMCP } from '../index.js';
+import type { ContractManagerMCP } from '../contractManagerMCP.js';
 import { taskService, employeeService, contractService } from '../services/index.js';
 import { assert } from '../utils/assert.js';
 

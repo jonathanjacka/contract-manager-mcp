@@ -1,4 +1,4 @@
-import type { ContractManagerMCP } from '../index.js';
+import type { ContractManagerMCP } from '../contractManagerMCP.js';
 import { registerEmployeeResources } from './employeeResources.js';
 import { registerProgramResources } from './programResources.js';
 import { registerContractResources } from './contractResources.js';

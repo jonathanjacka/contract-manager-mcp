@@ -1,4 +1,4 @@
-import type { ContractManagerMCP } from '../index.js';
+import type { ContractManagerMCP } from '../contractManagerMCP.js';
 import { employeeService, taskService } from '../services/index.js';
 import { assert } from '../utils/assert.js';
 import { z } from 'zod';

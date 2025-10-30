@@ -16,6 +16,7 @@ export class ContractManagerMCP {
         resources: {},
         prompts: {},
         completions: {},
+        elicitation: {},
       },
       instructions: `
 ${SERVER_INFO.displayName}: An MCP server for contract management with database integration.

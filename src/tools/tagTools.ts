@@ -143,13 +143,45 @@ export function registerTagTools(agent: ContractManagerMCP) {
     async ({ code }) => {
       const existingTag = await tagService.getByCode(code);
       assert(existingTag, `Tag with code "${code}" not found`);
+
+      // Elicitation: ask for confirmation before deleting
+      const capabilities = agent.server.server.getClientCapabilities?.();
+      if (capabilities?.elicitation) {
+        const result = await agent.server.server.elicitInput({
+          message: `Are you sure you want to delete tag "${existingTag.name}" (code: ${code})?`,
+          requestedSchema: {
+            type: 'object',
+            properties: {
+              confirmed: {
+                type: 'boolean',
+                description: 'Whether to confirm the action',
+              },
+            },
+          },
+        });
+        const confirmed = result.action === 'accept' && result.content?.['confirmed'] === true;
+        if (!confirmed) {
+          const structuredContent = { tag: existingTag };
+          return {
+            content: [
+              createText(
+                `Deleting tag "${existingTag.name}" (code: ${code}) was cancelled by the user.`
+              ),
+              createTagEmbeddedResource(existingTag),
+              createText(JSON.stringify(structuredContent, null, 2)),
+            ],
+            structuredContent,
+          };
+        }
+      }
+
       await tagService.deleteByCode(code);
       const structuredContent = { tag: existingTag };
       return {
         content: [
           createText(`Tag "${existingTag.name}" (code: ${code}) deleted successfully`),
           createTagEmbeddedResource(existingTag),
-          createText(structuredContent),
+          createText(JSON.stringify(structuredContent, null, 2)),
         ],
         structuredContent,
       };

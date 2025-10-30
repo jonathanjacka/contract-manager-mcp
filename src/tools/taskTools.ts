@@ -137,13 +137,45 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     async ({ code }) => {
       const existingTask = await taskService.getByCode(code);
       assert(existingTask, `Task with code "${code}" not found`);
+
+      // Elicitation: ask for confirmation before deleting
+      const capabilities = agent.server.server.getClientCapabilities?.();
+      if (capabilities?.elicitation) {
+        const result = await agent.server.server.elicitInput({
+          message: `Are you sure you want to delete task "${existingTask.name}" (code: ${code})?`,
+          requestedSchema: {
+            type: 'object',
+            properties: {
+              confirmed: {
+                type: 'boolean',
+                description: 'Whether to confirm the action',
+              },
+            },
+          },
+        });
+        const confirmed = result.action === 'accept' && result.content?.['confirmed'] === true;
+        if (!confirmed) {
+          const structuredContent = { task: existingTask };
+          return {
+            content: [
+              createText(
+                `Deleting task \"${existingTask.name}\" (code: ${code}) was cancelled by the user.`
+              ),
+              createTaskEmbeddedResource(existingTask),
+              createText(JSON.stringify(structuredContent, null, 2)),
+            ],
+            structuredContent,
+          };
+        }
+      }
+
       await taskService.deleteByCode(code);
       const structuredContent = { task: existingTask };
       return {
         content: [
-          createText(`Task "${existingTask.name}" (code: ${code}) deleted successfully`),
+          createText(`Task \"${existingTask.name}\" (code: ${code}) deleted successfully`),
           createTaskEmbeddedResource(existingTask),
-          createText(structuredContent),
+          createText(JSON.stringify(structuredContent, null, 2)),
         ],
         structuredContent,
       };

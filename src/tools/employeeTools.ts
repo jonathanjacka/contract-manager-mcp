@@ -1,5 +1,6 @@
 import type { ContractManagerMCP } from '../contractManagerMCP.js';
 import { employeeService, taskService } from '../services/index.js';
+import { db } from '../database/connection.js';
 import { assert } from '../utils/assert.js';
 import { z } from 'zod';
 import {
@@ -209,6 +210,7 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     }
   );
 
+  //Elicitation Example
   agent.server.registerTool(
     'delete_employee',
     {
@@ -223,6 +225,55 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     async ({ code }) => {
       const existingEmployee = await employeeService.getByCode(code);
       assert(existingEmployee, `Employee with code "${code}" not found`);
+
+      // Check if employee is a program manager
+      const programManaged = await db('programs').where('manager_id', existingEmployee.id).first();
+      if (programManaged) {
+        const structuredContent = { employee: existingEmployee };
+        return {
+          content: [
+            createText(
+              `Cannot delete employee "${existingEmployee.name}" (code: ${code}) because they are assigned as a program manager. Please reassign or remove the program(s) first.`
+            ),
+            createEmployeeEmbeddedResource(existingEmployee),
+            createText(JSON.stringify(structuredContent, null, 2)),
+          ],
+          structuredContent,
+        };
+      }
+
+      // Elicitation: ask for confirmation before deleting
+      const capabilities = agent.server.server.getClientCapabilities?.();
+      if (capabilities?.elicitation) {
+        const result = await agent.server.server.elicitInput({
+          message: `Are you sure you want to delete employee "${existingEmployee.name}" (code: ${code})?`,
+          requestedSchema: {
+            type: 'object',
+            properties: {
+              confirmed: {
+                type: 'boolean',
+                description: 'Whether to confirm the action',
+              },
+            },
+          },
+        });
+        const confirmed = result.action === 'accept' && result.content?.['confirmed'] === true;
+        if (!confirmed) {
+          const structuredContent = { employee: existingEmployee };
+          return {
+            content: [
+              createText(
+                `Deleting employee "${existingEmployee.name}" (code: ${code}) was cancelled by the user.`
+              ),
+              createEmployeeEmbeddedResource(existingEmployee),
+              createText(structuredContent),
+              createText(JSON.stringify(structuredContent, null, 2)),
+            ],
+            structuredContent,
+          };
+        }
+      }
+
       await employeeService.deleteByCode(code);
       const structuredContent = { employee: existingEmployee };
       return {
@@ -230,6 +281,7 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
           createText(`Employee "${existingEmployee.name}" (code: ${code}) deleted successfully`),
           createEmployeeEmbeddedResource(existingEmployee),
           createText(structuredContent),
+          createText(JSON.stringify(structuredContent, null, 2)),
         ],
         structuredContent,
       };

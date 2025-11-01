@@ -1,7 +1,7 @@
+import { z } from 'zod';
 import type { ContractManagerMCP } from '../contractManagerMCP.js';
 import { contractService } from '../services/index.js';
 import { assert } from '../utils/assert.js';
-import { z } from 'zod';
 import {
   contractCodeSchema,
   contractListOutputSchema,
@@ -50,14 +50,77 @@ export function registerContractTools(agent: ContractManagerMCP) {
         openWorldHint: false,
       } satisfies ToolAnnotations,
       inputSchema: contractCodeSchema,
-      outputSchema: { contract: z.object(contractOutputSchema) },
+      outputSchema: {
+        contract: z.object(contractOutputSchema),
+        summary: z.string().optional(),
+      },
     },
     async ({ code }) => {
       const contract = await contractService.getByCode(code);
       assert(contract, `Contract with code "${code}" not found`);
-      const structuredContent = { contract };
+      let summary: string | undefined = undefined;
+      const clientCapabilities = agent.server.server.getClientCapabilities?.();
+      if (clientCapabilities?.sampling && agent.server.server.elicitInput) {
+        const elicitResult = await agent.server.server.elicitInput({
+          message: 'Would you like a summary of this contract included?',
+          requestedSchema: {
+            type: 'object',
+            properties: {
+              includeSummary: {
+                type: 'boolean',
+                description: 'Whether to include a summary',
+              },
+            },
+          },
+        });
+        const includeSummary =
+          elicitResult.action === 'accept' && elicitResult.content?.['includeSummary'] === true;
+        if (includeSummary) {
+          const systemPrompt =
+            'You are a helpful assistant. Summarize the following contract in 2-4 sentences for a business audience.';
+          const userContent = {
+            name: contract.name,
+            description: contract.description,
+          };
+          try {
+            const result = await agent.server.server.createMessage({
+              systemPrompt,
+              messages: [
+                {
+                  role: 'user',
+                  content: {
+                    type: 'text',
+                    mimeType: 'application/json',
+                    text: JSON.stringify(userContent),
+                  },
+                },
+              ],
+              maxTokens: 150,
+            });
+            summary =
+              typeof result.content.text === 'string'
+                ? result.content.text
+                : String(result.content.text);
+          } catch (error) {
+            await agent.server.server.sendLoggingMessage?.({
+              level: 'error',
+              data: {
+                message: 'Error parsing contract summary',
+                modelResponse: error instanceof Error ? error.message : String(error),
+                error: error instanceof Error ? error.message : error,
+              },
+            });
+            summary = undefined;
+          }
+        }
+      }
+      const structuredContent = summary !== undefined ? { contract, summary } : { contract };
+      const contentArr = [createContractEmbeddedResource(contract), createText(structuredContent)];
+      if (summary !== undefined) {
+        contentArr.push(createText('Summary: ' + summary));
+      }
       return {
-        content: [createContractEmbeddedResource(contract), createText(structuredContent)],
+        content: contentArr,
         structuredContent,
       };
     }

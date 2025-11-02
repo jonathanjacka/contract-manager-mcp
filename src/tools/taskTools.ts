@@ -1,3 +1,4 @@
+import { tagService } from '../services/index.js';
 import type { ContractManagerMCP } from '../contractManagerMCP.js';
 import { taskService, contractService } from '../services/index.js';
 import { assert } from '../utils/assert.js';
@@ -14,6 +15,134 @@ import { createText, createTaskResourceLink, createTaskEmbeddedResource } from '
 import type { ToolAnnotations } from '../types/annotations.js';
 
 export function registerTaskTools(agent: ContractManagerMCP) {
+  // Suggest tags for a task using sampling
+  agent.server.registerTool(
+    'suggest_tags_for_task',
+    {
+      title: 'Suggest Tags for Task',
+      description: 'Suggest relevant tags for a task using AI sampling',
+      annotations: {
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
+      inputSchema: taskCodeSchema,
+      outputSchema: {
+        suggestedTags: z.array(
+          z.object({
+            id: z.string().optional(),
+            name: z.string().optional(),
+            description: z.string().optional(),
+          })
+        ),
+      },
+    },
+    async ({ code }) => {
+      const clientCapabilities = agent.server.server.getClientCapabilities?.();
+      if (!clientCapabilities?.sampling) {
+        return {
+          content: [createText('Client does not support sampling, skipping tag suggestion.')],
+          structuredContent: { suggestedTags: [] },
+        };
+      }
+
+      const task = await taskService.getByCode(code);
+      assert(task, `Task with code "${code}" not found`);
+      const allTags = await tagService.getAll();
+      const currentTags = await tagService.getByTaskCode(code);
+
+      // System prompt for the LLM
+      const systemPrompt = `You are a helpful assistant that suggests relevant tags for tasks to make them easier to categorize and find later. You will be provided with a task, its current tags, and all existing tags. Only suggest tags that are not already applied to this task. Tasks should not have more than 4-5 tags and it's perfectly fine to not have any tags at all. Feel free to suggest new tags that are not currently in the database and they will be created.\n\nYou will respond with JSON only.\nExample responses:\nIf you have no suggestions, respond with an empty array:\n[]\nIf you have some suggestions, respond with an array of tag objects. Existing tags have an "id" property, new tags have a "name" and "description" property:\n[{"id": "TAG001"}, {"name": "New Tag", "description": "The description of the new tag"}, {"id": "TAG002"}]`;
+
+      const userContent = {
+        task,
+        currentTags,
+        allTags,
+      };
+
+      const result = await agent.server.server.createMessage({
+        systemPrompt,
+        messages: [
+          {
+            role: 'user',
+            content: {
+              type: 'text',
+              mimeType: 'application/json',
+              text: JSON.stringify(userContent),
+            },
+          },
+        ],
+        maxTokens: 150,
+      });
+
+      // Parse and validate the model response
+      let suggestedTags: Array<{ id?: string; name?: string; description?: string }> = [];
+      try {
+        const text =
+          typeof result.content.text === 'string'
+            ? result.content.text
+            : String(result.content.text);
+        const parsed = JSON.parse(text);
+        if (Array.isArray(parsed)) {
+          suggestedTags = parsed.map((tag: any) => ({
+            id: typeof tag.id === 'string' ? tag.id : undefined,
+            name: typeof tag.name === 'string' ? tag.name : undefined,
+            description: typeof tag.description === 'string' ? tag.description : undefined,
+          }));
+        }
+      } catch (error) {
+        await agent.server.server.sendLoggingMessage?.({
+          level: 'error',
+          data: {
+            message: 'Error parsing tag suggestions',
+            modelResponse: result.content.text,
+            error: error instanceof Error ? error.message : error,
+          },
+        });
+        const structuredContent = { suggestedTags: [] };
+        return {
+          content: [
+            createText('Error parsing tag suggestions from model output.'),
+            createText(JSON.stringify(structuredContent, null, 2)),
+          ],
+          structuredContent,
+        };
+      }
+
+      // Create new tags if needed and collect all tag objects to return
+      const tagsToReturn: Array<{ id?: string; name?: string; description?: string }> = [];
+      for (const tag of suggestedTags) {
+        if (tag.id) {
+          // Existing tag
+          const found = allTags.find(t => t.code === tag.id);
+          if (found && !currentTags.some(t => t.code === tag.id)) {
+            tagsToReturn.push({ id: found.code, name: found.name });
+          }
+        } else if (tag.name) {
+          // New tag
+          const existing = allTags.find(t => t.name.toLowerCase() === tag.name!.toLowerCase());
+          if (!existing) {
+            // Create the new tag
+            try {
+              const created = await tagService.createWithCode({ name: tag.name! });
+              tagsToReturn.push({ id: created.code, name: created.name });
+            } catch (e) {
+              // If tag creation fails, skip
+              continue;
+            }
+          } else if (!currentTags.some(t => t.code === existing.code)) {
+            tagsToReturn.push({ id: existing.code, name: existing.name });
+          }
+        }
+      }
+
+      return {
+        content: [
+          createText(`Suggested tags for task "${task.name}" (code: ${code}):`),
+          createText(JSON.stringify({ suggestedTags: tagsToReturn }, null, 2)),
+        ],
+        structuredContent: { suggestedTags: tagsToReturn },
+      };
+    }
+  );
   agent.server.registerTool(
     'list_tasks',
     {

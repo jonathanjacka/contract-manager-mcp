@@ -78,4 +78,9 @@ export function registerEmployeeResources(agent: ContractManagerMCP) {
       };
     }
   );
+
+  // Return notification function to be called when employees change
+  return () => {
+    agent.server.sendResourceListChanged();
+  };
 }

@@ -119,6 +119,7 @@ export async function registerTagTools(agent: ContractManagerMCP) {
       const createdTag = await tagService.createWithCode(tagData);
 
       await updateTagToolsAvailability();
+      agent.resourceNotifiers?.notifyTagResourceChanged();
 
       const structuredContent = { tag: createdTag };
       return {
@@ -151,6 +152,7 @@ export async function registerTagTools(agent: ContractManagerMCP) {
       const existingTag = await tagService.getByCode(code);
       assert(existingTag, `Tag with code "${code}" not found`);
       const updatedTag = await tagService.updateByCode(code, updates);
+      agent.resourceNotifiers?.notifyTagResourceChanged();
       const structuredContent = { tag: updatedTag };
       return {
         content: [
@@ -212,6 +214,7 @@ export async function registerTagTools(agent: ContractManagerMCP) {
       await tagService.deleteByCode(code);
 
       await updateTagToolsAvailability();
+      agent.resourceNotifiers?.notifyTagResourceChanged();
 
       const structuredContent = { tag: existingTag };
       return {

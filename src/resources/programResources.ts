@@ -66,4 +66,9 @@ export function registerProgramResources(agent: ContractManagerMCP) {
       };
     }
   );
+
+  // Return notification function to be called when programs change
+  return () => {
+    agent.server.sendResourceListChanged();
+  };
 }

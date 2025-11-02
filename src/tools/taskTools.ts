@@ -242,6 +242,7 @@ export async function registerTaskTools(agent: ContractManagerMCP) {
       const createdTask = await taskService.createWithCode(taskData);
 
       await updateTaskToolsAvailability();
+      agent.resourceNotifiers?.notifyTaskResourceChanged();
 
       const structuredContent = { task: createdTask };
       return {
@@ -274,6 +275,7 @@ export async function registerTaskTools(agent: ContractManagerMCP) {
       const existingTask = await taskService.getByCode(code);
       assert(existingTask, `Task with code "${code}" not found`);
       const updatedTask = await taskService.updateByCode(code, updates);
+      agent.resourceNotifiers?.notifyTaskResourceChanged();
       const structuredContent = { task: updatedTask };
       return {
         content: [
@@ -335,6 +337,7 @@ export async function registerTaskTools(agent: ContractManagerMCP) {
       await taskService.deleteByCode(code);
 
       await updateTaskToolsAvailability();
+      agent.resourceNotifiers?.notifyTaskResourceChanged();
 
       const structuredContent = { task: existingTask };
       return {

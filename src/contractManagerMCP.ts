@@ -1,6 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { initializeTools } from './tools/index.js';
-import { initializeResources } from './resources/index.js';
+import { initializeResources, type ResourceNotifiers } from './resources/index.js';
 import { initializePrompts } from './prompts/index.js';
 import { SERVER_INFO } from './constants.js';
 
@@ -27,9 +27,11 @@ ${SERVER_INFO.description}
     }
   );
 
+  resourceNotifiers?: ResourceNotifiers;
+
   async init() {
+    this.resourceNotifiers = await initializeResources(this);
     await initializeTools(this);
-    await initializeResources(this);
     await initializePrompts(this);
   }
 }

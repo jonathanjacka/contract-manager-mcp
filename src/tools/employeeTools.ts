@@ -123,6 +123,7 @@ export async function registerEmployeeTools(agent: ContractManagerMCP) {
     async employeeData => {
       const createdEmployee = await employeeService.createWithCode(employeeData);
       await updateEmployeeToolsAvailability();
+      agent.resourceNotifiers?.notifyEmployeeResourceChanged();
       const structuredContent = { employee: createdEmployee };
       return {
         content: [
@@ -233,6 +234,7 @@ export async function registerEmployeeTools(agent: ContractManagerMCP) {
       const existingEmployee = await employeeService.getByCode(code);
       assert(existingEmployee, `Employee with code "${code}" not found`);
       const updatedEmployee = await employeeService.updateByCode(code, updates);
+      agent.resourceNotifiers?.notifyEmployeeResourceChanged();
       const structuredContent = { employee: updatedEmployee };
       return {
         content: [
@@ -310,6 +312,7 @@ export async function registerEmployeeTools(agent: ContractManagerMCP) {
 
       await employeeService.deleteByCode(code);
       await updateEmployeeToolsAvailability();
+      agent.resourceNotifiers?.notifyEmployeeResourceChanged();
       const structuredContent = { employee: existingEmployee };
       return {
         content: [

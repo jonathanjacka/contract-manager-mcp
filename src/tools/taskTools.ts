@@ -97,9 +97,13 @@ export function registerTaskTools(agent: ContractManagerMCP) {
             error: error instanceof Error ? error.message : error,
           },
         });
+        const structuredContent = { suggestedTags: [] };
         return {
-          content: [createText('Error parsing tag suggestions from model output.')],
-          structuredContent: { suggestedTags: [] },
+          content: [
+            createText('Error parsing tag suggestions from model output.'),
+            createText(JSON.stringify(structuredContent, null, 2)),
+          ],
+          structuredContent,
         };
       }
 

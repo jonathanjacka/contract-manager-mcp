@@ -14,10 +14,20 @@ import {
 import { createText, createTaskResourceLink, createTaskEmbeddedResource } from './utils.js';
 import type { ToolAnnotations } from '../types/annotations.js';
 
-export function registerTaskTools(agent: ContractManagerMCP) {
+export async function registerTaskTools(agent: ContractManagerMCP) {
+  const initialTasks = await taskService.getAll();
+  let hasTasks = initialTasks.length > 0;
+
   async function updateTaskToolsAvailability() {
     const tasks = await taskService.getAll();
-    const hasTasks = tasks.length > 0;
+    const newHasTasks = tasks.length > 0;
+
+    // Only update if state has changed
+    if (newHasTasks === hasTasks) {
+      return;
+    }
+
+    hasTasks = newHasTasks;
 
     if (hasTasks) {
       suggestTagsForTaskTool.enable();
@@ -376,5 +386,13 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     }
   );
 
-  updateTaskToolsAvailability();
+  // Set initial tool states based on database state (without triggering notifications)
+  if (!hasTasks) {
+    suggestTagsForTaskTool.disable();
+    listTasksTool.disable();
+    getTaskTool.disable();
+    updateTaskTool.disable();
+    deleteTaskTool.disable();
+    getTasksByContractTool.disable();
+  }
 }

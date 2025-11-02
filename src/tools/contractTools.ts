@@ -11,16 +11,9 @@ import { createText, createContractResourceLink, createContractEmbeddedResource 
 import type { ToolAnnotations } from '../types/annotations.js';
 
 export async function registerContractTools(agent: ContractManagerMCP) {
-  const updateContractToolsAvailability = async () => {
-    const contracts = await contractService.getAll();
-    const hasContracts = contracts.length > 0;
-
-    if (hasContracts) {
-      getContractTool.enable();
-    } else {
-      getContractTool.disable();
-    }
-  };
+  // Initialize state from database
+  const initialContracts = await contractService.getAll();
+  let hasContracts = initialContracts.length > 0;
 
   agent.server.registerTool(
     'list_contracts',
@@ -137,5 +130,8 @@ export async function registerContractTools(agent: ContractManagerMCP) {
     }
   );
 
-  await updateContractToolsAvailability();
+  // Set initial tool states based on database state (without triggering notifications)
+  if (!hasContracts) {
+    getContractTool.disable();
+  }
 }

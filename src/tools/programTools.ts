@@ -11,16 +11,8 @@ import { createText, createProgramResourceLink, createProgramEmbeddedResource } 
 import type { ToolAnnotations } from '../types/annotations.js';
 
 export async function registerProgramTools(agent: ContractManagerMCP) {
-  const updateProgramToolsAvailability = async () => {
-    const programs = await programService.getAll();
-    const hasPrograms = programs.length > 0;
-
-    if (hasPrograms) {
-      getProgramTool.enable();
-    } else {
-      getProgramTool.disable();
-    }
-  };
+  const initialPrograms = await programService.getAll();
+  let hasPrograms = initialPrograms.length > 0;
 
   agent.server.registerTool(
     'list_programs',
@@ -74,5 +66,8 @@ export async function registerProgramTools(agent: ContractManagerMCP) {
     }
   );
 
-  await updateProgramToolsAvailability();
+  // Set initial tool states
+  if (!hasPrograms) {
+    getProgramTool.disable();
+  }
 }

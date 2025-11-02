@@ -19,10 +19,19 @@ import {
 } from './utils.js';
 import type { ToolAnnotations } from '../types/annotations.js';
 
-export function registerTagTools(agent: ContractManagerMCP) {
+export async function registerTagTools(agent: ContractManagerMCP) {
+  const initialTags = await tagService.getAll();
+  let hasTags = initialTags.length > 0;
+
   async function updateTagToolsAvailability() {
     const tags = await tagService.getAll();
-    const hasTags = tags.length > 0;
+    const newHasTags = tags.length > 0;
+
+    if (newHasTags === hasTags) {
+      return;
+    }
+
+    hasTags = newHasTags;
 
     if (hasTags) {
       listTagsTool.enable();
@@ -294,5 +303,13 @@ export function registerTagTools(agent: ContractManagerMCP) {
     }
   );
 
-  updateTagToolsAvailability();
+  // Set initial tool states based on database state (without triggering notifications)
+  if (!hasTags) {
+    listTagsTool.disable();
+    getTagTool.disable();
+    editTagTool.disable();
+    deleteTagTool.disable();
+    addTagToTaskTool.disable();
+    removeTagFromTaskTool.disable();
+  }
 }

@@ -22,9 +22,19 @@ import {
 import type { ToolAnnotations } from '../types/annotations.js';
 
 export async function registerEmployeeTools(agent: ContractManagerMCP) {
+  const initialEmployees = await employeeService.getAll();
+  let hasEmployees = initialEmployees.length > 0;
+
   async function updateEmployeeToolsAvailability() {
     const employees = await employeeService.getAll();
-    const hasEmployees = employees.length > 0;
+    const newHasEmployees = employees.length > 0;
+
+    // Only update if state has changed
+    if (newHasEmployees === hasEmployees) {
+      return;
+    }
+
+    hasEmployees = newHasEmployees;
 
     if (hasEmployees) {
       listEmployeesTool.enable();
@@ -352,5 +362,14 @@ export async function registerEmployeeTools(agent: ContractManagerMCP) {
     }
   );
 
-  await updateEmployeeToolsAvailability();
+  // Set initial tool states
+  if (!hasEmployees) {
+    listEmployeesTool.disable();
+    getEmployeeTool.disable();
+    addEmployeeToTaskTool.disable();
+    getEmployeeByTaskTool.disable();
+    editEmployeeTool.disable();
+    deleteEmployeeTool.disable();
+    removeEmployeeFromTaskTool.disable();
+  }
 }

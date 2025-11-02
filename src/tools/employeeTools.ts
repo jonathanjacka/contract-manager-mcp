@@ -22,7 +22,6 @@ import {
 import type { ToolAnnotations } from '../types/annotations.js';
 
 export async function registerEmployeeTools(agent: ContractManagerMCP) {
-  // Helper function to update tool availability based on data
   async function updateEmployeeToolsAvailability() {
     const employees = await employeeService.getAll();
     const hasEmployees = employees.length > 0;
@@ -44,7 +43,7 @@ export async function registerEmployeeTools(agent: ContractManagerMCP) {
       deleteEmployeeTool.disable();
       removeEmployeeFromTaskTool.disable();
     }
-    // addEmployeeTool is always enabled
+    // addEmployeeTool always enabled
   }
 
   const listEmployeesTool = agent.server.registerTool(

@@ -15,7 +15,6 @@ import { createText, createTaskResourceLink, createTaskEmbeddedResource } from '
 import type { ToolAnnotations } from '../types/annotations.js';
 
 export function registerTaskTools(agent: ContractManagerMCP) {
-  // Helper function to update tool availability based on data
   async function updateTaskToolsAvailability() {
     const tasks = await taskService.getAll();
     const hasTasks = tasks.length > 0;
@@ -35,7 +34,7 @@ export function registerTaskTools(agent: ContractManagerMCP) {
       deleteTaskTool.disable();
       getTasksByContractTool.disable();
     }
-    // createTaskTool is always enabled
+    // createTaskTool always enabled
   }
 
   // Suggest tags for a task using sampling
@@ -72,7 +71,6 @@ export function registerTaskTools(agent: ContractManagerMCP) {
       const allTags = await tagService.getAll();
       const currentTags = await tagService.getByTaskCode(code);
 
-      // System prompt for the LLM
       const systemPrompt = `You are a helpful assistant that suggests relevant tags for tasks to make them easier to categorize and find later. You will be provided with a task, its current tags, and all existing tags. Only suggest tags that are not already applied to this task. Tasks should not have more than 4-5 tags and it's perfectly fine to not have any tags at all. Feel free to suggest new tags that are not currently in the database and they will be created.\n\nYou will respond with JSON only.\nExample responses:\nIf you have no suggestions, respond with an empty array:\n[]\nIf you have some suggestions, respond with an array of tag objects. Existing tags have an "id" property, new tags have a "name" and "description" property:\n[{"id": "TAG001"}, {"name": "New Tag", "description": "The description of the new tag"}, {"id": "TAG002"}]`;
 
       const userContent = {
@@ -96,7 +94,7 @@ export function registerTaskTools(agent: ContractManagerMCP) {
         maxTokens: 150,
       });
 
-      // Parse and validate the model response
+      // Parse/validate the model response
       let suggestedTags: Array<{ id?: string; name?: string; description?: string }> = [];
       try {
         const text =
@@ -233,7 +231,6 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     async taskData => {
       const createdTask = await taskService.createWithCode(taskData);
 
-      // Update tool availability after creating a task
       await updateTaskToolsAvailability();
 
       const structuredContent = { task: createdTask };
@@ -327,7 +324,6 @@ export function registerTaskTools(agent: ContractManagerMCP) {
 
       await taskService.deleteByCode(code);
 
-      // Update tool availability after deleting a task
       await updateTaskToolsAvailability();
 
       const structuredContent = { task: existingTask };
@@ -380,6 +376,5 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     }
   );
 
-  // Initialize tool availability based on current data
   updateTaskToolsAvailability();
 }

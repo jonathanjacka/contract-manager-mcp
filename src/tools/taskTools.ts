@@ -16,6 +16,7 @@ import type { ToolAnnotations } from '../types/annotations.js';
 import { notifyResourceSubscribers } from '../subscriptions/notifySubscribers.js';
 import { createUIResource } from '@mcp-ui/server';
 import { getTaskCardUI } from '../ui/taskCard.js';
+import { UI_FRAME_SIZES } from '../constants.js';
 
 export async function registerTaskTools(agent: ContractManagerMCP) {
   const initialTasks = await taskService.getAll();
@@ -464,6 +465,12 @@ export async function registerTaskTools(agent: ContractManagerMCP) {
               htmlString: htmlContent,
             },
             encoding: 'text',
+            uiMetadata: {
+              'preferred-frame-size': [
+                UI_FRAME_SIZES.TASK_CARD_WIDTH,
+                UI_FRAME_SIZES.TASK_CARD_HEIGHT,
+              ],
+            },
           }),
         ],
       };

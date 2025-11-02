@@ -3,6 +3,10 @@ import type { ContractManagerMCP } from '../contractManagerMCP.js';
 import { contractService } from '../services/index.js';
 import { assert } from '../utils/assert.js';
 import type { ResourceAnnotations } from '../types/annotations.js';
+import {
+  SubscribeRequestSchema,
+  UnsubscribeRequestSchema,
+} from '@modelcontextprotocol/sdk/types.js';
 
 export function registerContractResources(agent: ContractManagerMCP) {
   agent.server.registerResource(
@@ -66,4 +70,48 @@ export function registerContractResources(agent: ContractManagerMCP) {
       };
     }
   );
+
+  // Register subscription request handlers for contract resources
+  agent.server.server.setRequestHandler(SubscribeRequestSchema, async (request, extra) => {
+    const { uri } = request.params;
+
+    // Only allow subscriptions to individual contract URIs
+    if (!uri.startsWith('contract-manager://contracts/')) {
+      throw new Error(
+        `Cannot subscribe to ${uri}. Only individual contract resources support subscriptions (e.g., contract-manager://contracts/CNT001)`
+      );
+    }
+
+    // Extract contract code from URI
+    const code = uri.replace('contract-manager://contracts/', '');
+
+    // Verify the contract exists
+    const contract = await contractService.getByCode(code);
+    if (!contract) {
+      throw new Error(`Contract with code "${code}" not found`);
+    }
+
+    // Subscribe the session to this URI
+    const sessionId = extra.sessionId || 'default';
+    agent.subscriptionManager.subscribe(sessionId, uri);
+
+    // Return empty success response
+    return {};
+  });
+
+  // Register unsubscription request handler
+  agent.server.server.setRequestHandler(UnsubscribeRequestSchema, async (request, extra) => {
+    const { uri } = request.params;
+    const sessionId = extra.sessionId || 'default';
+
+    agent.subscriptionManager.unsubscribe(sessionId, uri);
+
+    // Return empty success response
+    return {};
+  });
+
+  // Return notification function to be called when contracts change
+  return () => {
+    agent.server.sendResourceListChanged();
+  };
 }

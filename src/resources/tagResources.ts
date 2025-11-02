@@ -66,4 +66,9 @@ export function registerTagResources(agent: ContractManagerMCP) {
       };
     }
   );
+
+  // Return notification function to be called when tags change
+  return () => {
+    agent.server.sendResourceListChanged();
+  };
 }

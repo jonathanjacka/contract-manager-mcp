@@ -13,10 +13,43 @@ import {
 } from '../schemas/schema.js';
 import { createText, createTaskResourceLink, createTaskEmbeddedResource } from './utils.js';
 import type { ToolAnnotations } from '../types/annotations.js';
+import { notifyResourceSubscribers } from '../subscriptions/notifySubscribers.js';
 
-export function registerTaskTools(agent: ContractManagerMCP) {
+export async function registerTaskTools(agent: ContractManagerMCP) {
+  const initialTasks = await taskService.getAll();
+  let hasTasks = initialTasks.length > 0;
+
+  async function updateTaskToolsAvailability() {
+    const tasks = await taskService.getAll();
+    const newHasTasks = tasks.length > 0;
+
+    // Only update if state has changed
+    if (newHasTasks === hasTasks) {
+      return;
+    }
+
+    hasTasks = newHasTasks;
+
+    if (hasTasks) {
+      suggestTagsForTaskTool.enable();
+      listTasksTool.enable();
+      getTaskTool.enable();
+      updateTaskTool.enable();
+      deleteTaskTool.enable();
+      getTasksByContractTool.enable();
+    } else {
+      suggestTagsForTaskTool.disable();
+      listTasksTool.disable();
+      getTaskTool.disable();
+      updateTaskTool.disable();
+      deleteTaskTool.disable();
+      getTasksByContractTool.disable();
+    }
+    // createTaskTool always enabled
+  }
+
   // Suggest tags for a task using sampling
-  agent.server.registerTool(
+  const suggestTagsForTaskTool = agent.server.registerTool(
     'suggest_tags_for_task',
     {
       title: 'Suggest Tags for Task',
@@ -49,7 +82,6 @@ export function registerTaskTools(agent: ContractManagerMCP) {
       const allTags = await tagService.getAll();
       const currentTags = await tagService.getByTaskCode(code);
 
-      // System prompt for the LLM
       const systemPrompt = `You are a helpful assistant that suggests relevant tags for tasks to make them easier to categorize and find later. You will be provided with a task, its current tags, and all existing tags. Only suggest tags that are not already applied to this task. Tasks should not have more than 4-5 tags and it's perfectly fine to not have any tags at all. Feel free to suggest new tags that are not currently in the database and they will be created.\n\nYou will respond with JSON only.\nExample responses:\nIf you have no suggestions, respond with an empty array:\n[]\nIf you have some suggestions, respond with an array of tag objects. Existing tags have an "id" property, new tags have a "name" and "description" property:\n[{"id": "TAG001"}, {"name": "New Tag", "description": "The description of the new tag"}, {"id": "TAG002"}]`;
 
       const userContent = {
@@ -73,7 +105,7 @@ export function registerTaskTools(agent: ContractManagerMCP) {
         maxTokens: 150,
       });
 
-      // Parse and validate the model response
+      // Parse/validate the model response
       let suggestedTags: Array<{ id?: string; name?: string; description?: string }> = [];
       try {
         const text =
@@ -143,7 +175,7 @@ export function registerTaskTools(agent: ContractManagerMCP) {
       };
     }
   );
-  agent.server.registerTool(
+  const listTasksTool = agent.server.registerTool(
     'list_tasks',
     {
       title: 'List Tasks',
@@ -172,7 +204,7 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const getTaskTool = agent.server.registerTool(
     'get_task',
     {
       title: 'Get Task',
@@ -209,6 +241,16 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     },
     async taskData => {
       const createdTask = await taskService.createWithCode(taskData);
+
+      await updateTaskToolsAvailability();
+      agent.resourceNotifiers?.notifyTaskResourceChanged();
+
+      // Notify contract subscribers that a task was added to their contract
+      const contract = await contractService.getByCode(taskData.contract_code);
+      if (contract) {
+        await notifyResourceSubscribers(agent, `contract-manager://contracts/${contract.code}`);
+      }
+
       const structuredContent = { task: createdTask };
       return {
         content: [
@@ -223,7 +265,7 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const updateTaskTool = agent.server.registerTool(
     'update_task',
     {
       title: 'Update Task',
@@ -240,6 +282,14 @@ export function registerTaskTools(agent: ContractManagerMCP) {
       const existingTask = await taskService.getByCode(code);
       assert(existingTask, `Task with code "${code}" not found`);
       const updatedTask = await taskService.updateByCode(code, updates);
+      agent.resourceNotifiers?.notifyTaskResourceChanged();
+
+      // Notify contract subscribers that a task in their contract was updated
+      const contract = await contractService.getById(updatedTask.contract_id);
+      if (contract) {
+        await notifyResourceSubscribers(agent, `contract-manager://contracts/${contract.code}`);
+      }
+
       const structuredContent = { task: updatedTask };
       return {
         content: [
@@ -252,7 +302,7 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const deleteTaskTool = agent.server.registerTool(
     'delete_task',
     {
       title: 'Delete Task',
@@ -299,6 +349,16 @@ export function registerTaskTools(agent: ContractManagerMCP) {
       }
 
       await taskService.deleteByCode(code);
+
+      await updateTaskToolsAvailability();
+      agent.resourceNotifiers?.notifyTaskResourceChanged();
+
+      // Notify contract subscribers that a task was removed from their contract
+      const contract = await contractService.getById(existingTask.contract_id);
+      if (contract) {
+        await notifyResourceSubscribers(agent, `contract-manager://contracts/${contract.code}`);
+      }
+
       const structuredContent = { task: existingTask };
       return {
         content: [
@@ -311,7 +371,7 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const getTasksByContractTool = agent.server.registerTool(
     'get_tasks_by_contract',
     {
       title: 'Get Tasks by Contract',
@@ -348,4 +408,14 @@ export function registerTaskTools(agent: ContractManagerMCP) {
       };
     }
   );
+
+  // Set initial tool states based on database state (without triggering notifications)
+  if (!hasTasks) {
+    suggestTagsForTaskTool.disable();
+    listTasksTool.disable();
+    getTaskTool.disable();
+    updateTaskTool.disable();
+    deleteTaskTool.disable();
+    getTasksByContractTool.disable();
+  }
 }

@@ -12,6 +12,12 @@ export const contractCodeSchema = {
   code: z.string().describe('Contract code (e.g., C001)'),
 };
 
+export const updateContractInputSchema = {
+  code: z.string().describe('Contract code to update (e.g., C001)'),
+  name: z.string().optional().describe('New contract name'),
+  description: z.string().optional().describe('New contract description'),
+};
+
 export const taskCodeSchema = {
   code: z.string().describe('Task code (e.g., T001)'),
 };

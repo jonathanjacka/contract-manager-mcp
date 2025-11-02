@@ -66,4 +66,9 @@ export function registerTaskResources(agent: ContractManagerMCP) {
       };
     }
   );
+
+  // Return notification function to be called when tasks change
+  return () => {
+    agent.server.sendResourceListChanged();
+  };
 }

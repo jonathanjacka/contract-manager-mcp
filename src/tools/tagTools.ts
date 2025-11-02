@@ -19,8 +19,39 @@ import {
 } from './utils.js';
 import type { ToolAnnotations } from '../types/annotations.js';
 
-export function registerTagTools(agent: ContractManagerMCP) {
-  agent.server.registerTool(
+export async function registerTagTools(agent: ContractManagerMCP) {
+  const initialTags = await tagService.getAll();
+  let hasTags = initialTags.length > 0;
+
+  async function updateTagToolsAvailability() {
+    const tags = await tagService.getAll();
+    const newHasTags = tags.length > 0;
+
+    if (newHasTags === hasTags) {
+      return;
+    }
+
+    hasTags = newHasTags;
+
+    if (hasTags) {
+      listTagsTool.enable();
+      getTagTool.enable();
+      editTagTool.enable();
+      deleteTagTool.enable();
+      addTagToTaskTool.enable();
+      removeTagFromTaskTool.enable();
+    } else {
+      listTagsTool.disable();
+      getTagTool.disable();
+      editTagTool.disable();
+      deleteTagTool.disable();
+      addTagToTaskTool.disable();
+      removeTagFromTaskTool.disable();
+    }
+    // createTagTool always enabled
+  }
+
+  const listTagsTool = agent.server.registerTool(
     'list_tags',
     {
       title: 'List Tags',
@@ -49,7 +80,7 @@ export function registerTagTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const getTagTool = agent.server.registerTool(
     'get_tag',
     {
       title: 'Get Tag',
@@ -86,6 +117,10 @@ export function registerTagTools(agent: ContractManagerMCP) {
     },
     async tagData => {
       const createdTag = await tagService.createWithCode(tagData);
+
+      await updateTagToolsAvailability();
+      agent.resourceNotifiers?.notifyTagResourceChanged();
+
       const structuredContent = { tag: createdTag };
       return {
         content: [
@@ -100,7 +135,7 @@ export function registerTagTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const editTagTool = agent.server.registerTool(
     'edit_tag',
     {
       title: 'Edit Tag',
@@ -117,6 +152,7 @@ export function registerTagTools(agent: ContractManagerMCP) {
       const existingTag = await tagService.getByCode(code);
       assert(existingTag, `Tag with code "${code}" not found`);
       const updatedTag = await tagService.updateByCode(code, updates);
+      agent.resourceNotifiers?.notifyTagResourceChanged();
       const structuredContent = { tag: updatedTag };
       return {
         content: [
@@ -129,7 +165,7 @@ export function registerTagTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const deleteTagTool = agent.server.registerTool(
     'delete_tag',
     {
       title: 'Delete Tag',
@@ -176,6 +212,10 @@ export function registerTagTools(agent: ContractManagerMCP) {
       }
 
       await tagService.deleteByCode(code);
+
+      await updateTagToolsAvailability();
+      agent.resourceNotifiers?.notifyTagResourceChanged();
+
       const structuredContent = { tag: existingTag };
       return {
         content: [
@@ -188,7 +228,7 @@ export function registerTagTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const addTagToTaskTool = agent.server.registerTool(
     'add_tag_to_task',
     {
       title: 'Add Tag to Task',
@@ -227,7 +267,7 @@ export function registerTagTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const removeTagFromTaskTool = agent.server.registerTool(
     'remove_tag_from_task',
     {
       title: 'Remove Tag from Task',
@@ -265,4 +305,14 @@ export function registerTagTools(agent: ContractManagerMCP) {
       };
     }
   );
+
+  // Set initial tool states based on database state (without triggering notifications)
+  if (!hasTags) {
+    listTagsTool.disable();
+    getTagTool.disable();
+    editTagTool.disable();
+    deleteTagTool.disable();
+    addTagToTaskTool.disable();
+    removeTagFromTaskTool.disable();
+  }
 }

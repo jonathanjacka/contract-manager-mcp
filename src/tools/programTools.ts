@@ -10,7 +10,10 @@ import {
 import { createText, createProgramResourceLink, createProgramEmbeddedResource } from './utils.js';
 import type { ToolAnnotations } from '../types/annotations.js';
 
-export function registerProgramTools(agent: ContractManagerMCP) {
+export async function registerProgramTools(agent: ContractManagerMCP) {
+  const initialPrograms = await programService.getAll();
+  let hasPrograms = initialPrograms.length > 0;
+
   agent.server.registerTool(
     'list_programs',
     {
@@ -40,7 +43,7 @@ export function registerProgramTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const getProgramTool = agent.server.registerTool(
     'get_program',
     {
       title: 'Get Program',
@@ -62,4 +65,9 @@ export function registerProgramTools(agent: ContractManagerMCP) {
       };
     }
   );
+
+  // Set initial tool states
+  if (!hasPrograms) {
+    getProgramTool.disable();
+  }
 }

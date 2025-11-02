@@ -10,7 +10,18 @@ import {
 import { createText, createContractResourceLink, createContractEmbeddedResource } from './utils.js';
 import type { ToolAnnotations } from '../types/annotations.js';
 
-export function registerContractTools(agent: ContractManagerMCP) {
+export async function registerContractTools(agent: ContractManagerMCP) {
+  const updateContractToolsAvailability = async () => {
+    const contracts = await contractService.getAll();
+    const hasContracts = contracts.length > 0;
+
+    if (hasContracts) {
+      getContractTool.enable();
+    } else {
+      getContractTool.disable();
+    }
+  };
+
   agent.server.registerTool(
     'list_contracts',
     {
@@ -40,7 +51,7 @@ export function registerContractTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const getContractTool = agent.server.registerTool(
     'get_contract',
     {
       title: 'Get Contract',
@@ -125,4 +136,6 @@ export function registerContractTools(agent: ContractManagerMCP) {
       };
     }
   );
+
+  await updateContractToolsAvailability();
 }

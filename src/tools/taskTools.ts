@@ -15,8 +15,31 @@ import { createText, createTaskResourceLink, createTaskEmbeddedResource } from '
 import type { ToolAnnotations } from '../types/annotations.js';
 
 export function registerTaskTools(agent: ContractManagerMCP) {
+  // Helper function to update tool availability based on data
+  async function updateTaskToolsAvailability() {
+    const tasks = await taskService.getAll();
+    const hasTasks = tasks.length > 0;
+
+    if (hasTasks) {
+      suggestTagsForTaskTool.enable();
+      listTasksTool.enable();
+      getTaskTool.enable();
+      updateTaskTool.enable();
+      deleteTaskTool.enable();
+      getTasksByContractTool.enable();
+    } else {
+      suggestTagsForTaskTool.disable();
+      listTasksTool.disable();
+      getTaskTool.disable();
+      updateTaskTool.disable();
+      deleteTaskTool.disable();
+      getTasksByContractTool.disable();
+    }
+    // createTaskTool is always enabled
+  }
+
   // Suggest tags for a task using sampling
-  agent.server.registerTool(
+  const suggestTagsForTaskTool = agent.server.registerTool(
     'suggest_tags_for_task',
     {
       title: 'Suggest Tags for Task',
@@ -143,7 +166,7 @@ export function registerTaskTools(agent: ContractManagerMCP) {
       };
     }
   );
-  agent.server.registerTool(
+  const listTasksTool = agent.server.registerTool(
     'list_tasks',
     {
       title: 'List Tasks',
@@ -172,7 +195,7 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const getTaskTool = agent.server.registerTool(
     'get_task',
     {
       title: 'Get Task',
@@ -209,6 +232,10 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     },
     async taskData => {
       const createdTask = await taskService.createWithCode(taskData);
+
+      // Update tool availability after creating a task
+      await updateTaskToolsAvailability();
+
       const structuredContent = { task: createdTask };
       return {
         content: [
@@ -223,7 +250,7 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const updateTaskTool = agent.server.registerTool(
     'update_task',
     {
       title: 'Update Task',
@@ -252,7 +279,7 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const deleteTaskTool = agent.server.registerTool(
     'delete_task',
     {
       title: 'Delete Task',
@@ -299,6 +326,10 @@ export function registerTaskTools(agent: ContractManagerMCP) {
       }
 
       await taskService.deleteByCode(code);
+
+      // Update tool availability after deleting a task
+      await updateTaskToolsAvailability();
+
       const structuredContent = { task: existingTask };
       return {
         content: [
@@ -311,7 +342,7 @@ export function registerTaskTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const getTasksByContractTool = agent.server.registerTool(
     'get_tasks_by_contract',
     {
       title: 'Get Tasks by Contract',
@@ -348,4 +379,7 @@ export function registerTaskTools(agent: ContractManagerMCP) {
       };
     }
   );
+
+  // Initialize tool availability based on current data
+  updateTaskToolsAvailability();
 }

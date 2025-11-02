@@ -6,9 +6,9 @@ import { registerProgramTools } from './programTools.js';
 import { registerContractTools } from './contractTools.js';
 
 export async function initializeTools(agent: ContractManagerMCP) {
-  registerEmployeeTools(agent);
-  registerProgramTools(agent);
-  registerContractTools(agent);
-  registerTaskTools(agent);
-  registerTagTools(agent);
+  await registerEmployeeTools(agent);
+  await registerProgramTools(agent);
+  await registerContractTools(agent);
+  await registerTaskTools(agent);
+  await registerTagTools(agent);
 }

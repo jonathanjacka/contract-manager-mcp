@@ -21,8 +21,33 @@ import {
 } from './utils.js';
 import type { ToolAnnotations } from '../types/annotations.js';
 
-export function registerEmployeeTools(agent: ContractManagerMCP) {
-  agent.server.registerTool(
+export async function registerEmployeeTools(agent: ContractManagerMCP) {
+  // Helper function to update tool availability based on data
+  async function updateEmployeeToolsAvailability() {
+    const employees = await employeeService.getAll();
+    const hasEmployees = employees.length > 0;
+
+    if (hasEmployees) {
+      listEmployeesTool.enable();
+      getEmployeeTool.enable();
+      addEmployeeToTaskTool.enable();
+      getEmployeeByTaskTool.enable();
+      editEmployeeTool.enable();
+      deleteEmployeeTool.enable();
+      removeEmployeeFromTaskTool.enable();
+    } else {
+      listEmployeesTool.disable();
+      getEmployeeTool.disable();
+      addEmployeeToTaskTool.disable();
+      getEmployeeByTaskTool.disable();
+      editEmployeeTool.disable();
+      deleteEmployeeTool.disable();
+      removeEmployeeFromTaskTool.disable();
+    }
+    // addEmployeeTool is always enabled
+  }
+
+  const listEmployeesTool = agent.server.registerTool(
     'list_employees',
     {
       title: 'List Employees',
@@ -51,7 +76,7 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const getEmployeeTool = agent.server.registerTool(
     'get_employee',
     {
       title: 'Get Employee',
@@ -88,6 +113,7 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     },
     async employeeData => {
       const createdEmployee = await employeeService.createWithCode(employeeData);
+      await updateEmployeeToolsAvailability();
       const structuredContent = { employee: createdEmployee };
       return {
         content: [
@@ -102,7 +128,7 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const addEmployeeToTaskTool = agent.server.registerTool(
     'add_employee_to_task',
     {
       title: 'Add Employee to Task',
@@ -141,7 +167,7 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const getEmployeeByTaskTool = agent.server.registerTool(
     'get_employee_by_task',
     {
       title: 'Get Employees by Task',
@@ -181,7 +207,7 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const editEmployeeTool = agent.server.registerTool(
     'edit_employee',
     {
       title: 'Edit Employee',
@@ -210,8 +236,7 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     }
   );
 
-  //Elicitation Example
-  agent.server.registerTool(
+  const deleteEmployeeTool = agent.server.registerTool(
     'delete_employee',
     {
       title: 'Delete Employee',
@@ -275,6 +300,7 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
       }
 
       await employeeService.deleteByCode(code);
+      await updateEmployeeToolsAvailability();
       const structuredContent = { employee: existingEmployee };
       return {
         content: [
@@ -288,7 +314,7 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
     }
   );
 
-  agent.server.registerTool(
+  const removeEmployeeFromTaskTool = agent.server.registerTool(
     'remove_employee_from_task',
     {
       title: 'Remove Employee from Task',
@@ -326,4 +352,6 @@ export function registerEmployeeTools(agent: ContractManagerMCP) {
       };
     }
   );
+
+  await updateEmployeeToolsAvailability();
 }

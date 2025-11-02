@@ -12,8 +12,8 @@ export class ContractManagerMCP {
     },
     {
       capabilities: {
-        tools: {},
-        resources: {},
+        tools: { listChanged: true, subscribe: true },
+        resources: { listChanged: true, subscribe: true },
         prompts: {},
         completions: {},
         elicitation: {},

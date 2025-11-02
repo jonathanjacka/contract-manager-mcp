@@ -13,6 +13,7 @@ import {
 } from '../schemas/schema.js';
 import { createText, createTaskResourceLink, createTaskEmbeddedResource } from './utils.js';
 import type { ToolAnnotations } from '../types/annotations.js';
+import { notifyResourceSubscribers } from '../subscriptions/notifySubscribers.js';
 
 export async function registerTaskTools(agent: ContractManagerMCP) {
   const initialTasks = await taskService.getAll();
@@ -244,6 +245,12 @@ export async function registerTaskTools(agent: ContractManagerMCP) {
       await updateTaskToolsAvailability();
       agent.resourceNotifiers?.notifyTaskResourceChanged();
 
+      // Notify contract subscribers that a task was added to their contract
+      const contract = await contractService.getByCode(taskData.contract_code);
+      if (contract) {
+        await notifyResourceSubscribers(agent, `contract-manager://contracts/${contract.code}`);
+      }
+
       const structuredContent = { task: createdTask };
       return {
         content: [
@@ -276,6 +283,13 @@ export async function registerTaskTools(agent: ContractManagerMCP) {
       assert(existingTask, `Task with code "${code}" not found`);
       const updatedTask = await taskService.updateByCode(code, updates);
       agent.resourceNotifiers?.notifyTaskResourceChanged();
+
+      // Notify contract subscribers that a task in their contract was updated
+      const contract = await contractService.getById(updatedTask.contract_id);
+      if (contract) {
+        await notifyResourceSubscribers(agent, `contract-manager://contracts/${contract.code}`);
+      }
+
       const structuredContent = { task: updatedTask };
       return {
         content: [
@@ -338,6 +352,12 @@ export async function registerTaskTools(agent: ContractManagerMCP) {
 
       await updateTaskToolsAvailability();
       agent.resourceNotifiers?.notifyTaskResourceChanged();
+
+      // Notify contract subscribers that a task was removed from their contract
+      const contract = await contractService.getById(existingTask.contract_id);
+      if (contract) {
+        await notifyResourceSubscribers(agent, `contract-manager://contracts/${contract.code}`);
+      }
 
       const structuredContent = { task: existingTask };
       return {

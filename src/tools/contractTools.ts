@@ -6,9 +6,11 @@ import {
   contractCodeSchema,
   contractListOutputSchema,
   contractOutputSchema,
+  updateContractInputSchema,
 } from '../schemas/schema.js';
 import { createText, createContractResourceLink, createContractEmbeddedResource } from './utils.js';
 import type { ToolAnnotations } from '../types/annotations.js';
+import { notifyResourceSubscribers } from '../subscriptions/notifySubscribers.js';
 
 export async function registerContractTools(agent: ContractManagerMCP) {
   // Initialize state from database
@@ -126,6 +128,44 @@ export async function registerContractTools(agent: ContractManagerMCP) {
       return {
         content: contentArr,
         structuredContent,
+      };
+    }
+  );
+
+  // Update contract
+  agent.server.registerTool(
+    'update_contract',
+    {
+      title: 'Update Contract',
+      description:
+        'Update a contract by code. Demonstrates subscription notifications - subscribers will be notified of the change.',
+      inputSchema: updateContractInputSchema,
+      outputSchema: {
+        contract: z.object(contractOutputSchema),
+      },
+    },
+    async ({ code, name, description }) => {
+      const contract = await contractService.getByCode(code);
+      assert(contract, `Contract with code "${code}" not found`);
+
+      // Update the contract
+      const updated = await contractService.update(contract.id, {
+        ...(name !== undefined && { name }),
+        ...(description !== undefined && { description }),
+      });
+      assert(updated, 'Failed to update contract');
+
+      // Notify resource list_changed
+      if (agent.resourceNotifiers?.notifyContractResourceChanged) {
+        await agent.resourceNotifiers.notifyContractResourceChanged();
+      }
+
+      // Notify subscription subscribers for this specific contract
+      await notifyResourceSubscribers(agent, `contract-manager://contracts/${updated.code}`);
+
+      return {
+        content: [createText({ contract: updated })],
+        structuredContent: { contract: updated },
       };
     }
   );

@@ -3,6 +3,7 @@ import { initializeTools } from './tools/index.js';
 import { initializeResources, type ResourceNotifiers } from './resources/index.js';
 import { initializePrompts } from './prompts/index.js';
 import { SERVER_INFO } from './constants.js';
+import { SubscriptionManager } from './subscriptions/subscriptionManager.js';
 
 export class ContractManagerMCP {
   server = new McpServer(
@@ -12,7 +13,7 @@ export class ContractManagerMCP {
     },
     {
       capabilities: {
-        tools: { listChanged: true, subscribe: true },
+        tools: { listChanged: true },
         resources: { listChanged: true, subscribe: true },
         prompts: {},
         completions: {},
@@ -28,6 +29,7 @@ ${SERVER_INFO.description}
   );
 
   resourceNotifiers?: ResourceNotifiers;
+  subscriptionManager = new SubscriptionManager();
 
   async init() {
     this.resourceNotifiers = await initializeResources(this);

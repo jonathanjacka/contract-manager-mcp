@@ -86,8 +86,3 @@ export const ERROR_CODES = {
   METHOD_NOT_FOUND: -32601,
   INVALID_PARAMS: -32602,
 } as const;
-
-export const UI_FRAME_SIZES = {
-  TASK_CARD_WIDTH: '1000px',
-  TASK_CARD_HEIGHT: '1000px',
-} as const;

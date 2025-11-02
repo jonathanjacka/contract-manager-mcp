@@ -16,7 +16,7 @@ import type { ToolAnnotations } from '../types/annotations.js';
 import { notifyResourceSubscribers } from '../subscriptions/notifySubscribers.js';
 import { createUIResource } from '@mcp-ui/server';
 import { getTaskCardUI } from '../ui/taskCard.js';
-import { UI_FRAME_SIZES } from '../constants.js';
+import { UI_FRAME_SIZES } from '../ui/styles/constants.js';
 
 export async function registerTaskTools(agent: ContractManagerMCP) {
   const initialTasks = await taskService.getAll();

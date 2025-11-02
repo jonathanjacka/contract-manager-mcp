@@ -1,4 +1,4 @@
-import { tagService } from '../services/index.js';
+import { tagService, employeeService, programService } from '../services/index.js';
 import type { ContractManagerMCP } from '../contractManagerMCP.js';
 import { taskService, contractService } from '../services/index.js';
 import { assert } from '../utils/assert.js';
@@ -14,6 +14,8 @@ import {
 import { createText, createTaskResourceLink, createTaskEmbeddedResource } from './utils.js';
 import type { ToolAnnotations } from '../types/annotations.js';
 import { notifyResourceSubscribers } from '../subscriptions/notifySubscribers.js';
+import { createUIResource } from '@mcp-ui/server';
+import { getTaskCardUI } from '../ui/taskCard.js';
 
 export async function registerTaskTools(agent: ContractManagerMCP) {
   const initialTasks = await taskService.getAll();
@@ -37,6 +39,7 @@ export async function registerTaskTools(agent: ContractManagerMCP) {
       updateTaskTool.enable();
       deleteTaskTool.enable();
       getTasksByContractTool.enable();
+      viewTaskTool.enable();
     } else {
       suggestTagsForTaskTool.disable();
       listTasksTool.disable();
@@ -44,6 +47,7 @@ export async function registerTaskTools(agent: ContractManagerMCP) {
       updateTaskTool.disable();
       deleteTaskTool.disable();
       getTasksByContractTool.disable();
+      viewTaskTool.disable();
     }
     // createTaskTool always enabled
   }
@@ -409,6 +413,63 @@ export async function registerTaskTools(agent: ContractManagerMCP) {
     }
   );
 
+  // View task as interactive card
+  const viewTaskTool = agent.server.registerTool(
+    'view_task',
+    {
+      title: 'View Task Card',
+      description:
+        'View a task as an interactive card with buttons to assign/remove employees, add/remove tags, and update completion progress',
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
+      inputSchema: taskCodeSchema,
+    },
+    async ({ code }) => {
+      const task = await taskService.getByCode(code);
+      assert(task, `Task with code "${code}" not found`);
+
+      // Build task with details
+      const contract = await contractService.getById(task.contract_id);
+      assert(contract, `Contract not found for task ${code}`);
+
+      const program = await programService.getById(contract.program_id);
+      assert(program, `Program not found for contract ${contract.code}`);
+
+      const employees = await taskService.getAssignedEmployees(task.id);
+      const tags = await taskService.getTags(task.id);
+
+      const taskWithDetails = {
+        ...task,
+        contract: {
+          ...contract,
+          program,
+        },
+        employees,
+        tags,
+      };
+
+      const availableEmployees = await employeeService.getAll();
+      const availableTags = await tagService.getAll();
+
+      const htmlContent = getTaskCardUI(taskWithDetails, availableEmployees, availableTags);
+
+      return {
+        content: [
+          createUIResource({
+            uri: `ui://task/${task.id}`,
+            content: {
+              type: 'rawHtml',
+              htmlString: htmlContent,
+            },
+            encoding: 'text',
+          }),
+        ],
+      };
+    }
+  );
+
   // Set initial tool states based on database state (without triggering notifications)
   if (!hasTasks) {
     suggestTagsForTaskTool.disable();
@@ -417,5 +478,8 @@ export async function registerTaskTools(agent: ContractManagerMCP) {
     updateTaskTool.disable();
     deleteTaskTool.disable();
     getTasksByContractTool.disable();
+    viewTaskTool.disable();
+  } else {
+    viewTaskTool.enable();
   }
 }

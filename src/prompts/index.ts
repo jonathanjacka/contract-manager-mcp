@@ -1,9 +1,9 @@
 import type { ContractManagerMCP } from '../contractManagerMCP.js';
-import { registerContractAnalysisPrompt } from './contractAnalysis';
-import { registerTaskPlanningPrompt } from './taskPlanning';
-import { registerTeamAssignmentPrompt } from './teamAssignment';
-import { registerProgressReviewPrompt } from './progressReview';
-import { registerTagSuggestionsPrompt } from './tagSuggestions';
+import { registerContractAnalysisPrompt } from './contractAnalysis.js';
+import { registerTaskPlanningPrompt } from './taskPlanning.js';
+import { registerTeamAssignmentPrompt } from './teamAssignment.js';
+import { registerProgressReviewPrompt } from './progressReview.js';
+import { registerTagSuggestionsPrompt } from './tagSuggestions.js';
 
 export async function initializePrompts(agent: ContractManagerMCP) {
   registerContractAnalysisPrompt(agent);

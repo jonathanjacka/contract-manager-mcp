@@ -1,21 +1,8 @@
 # Contract Manager MCP Server
 
-A demonstration [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server built with the official [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk). This server simulates a contract management system and showcases MCP capabilities including tools, resources, prompts, subscriptions, progress notifications, sampling, and elicitation.
+A demonstration [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server built with the official [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk). This server simulates a contract management system and showcases MCP capabilities including tools, resources, prompts, subscriptions, progress notifications, sampling, elicitation, and interactive UI cards.
 
-Built with TypeScript, Express.js, and SQLite.
-
-## Branch Structure
-
-This project has two main branches:
-
-- **`main`** - Core MCP server without UI features (original implementation)
-- **`main-ui`** - Includes interactive UI cards powered by [@mcp-ui/server](https://www.npmjs.com/package/@mcp-ui/server)
-
-**Switch to the UI branch to explore interactive card features:**
-
-```bash
-git checkout main-ui
-```
+Built with TypeScript, Express.js, SQLite, and [@mcp-ui/server](https://www.npmjs.com/package/@mcp-ui/server).
 
 ## Quick Start
 
@@ -129,13 +116,17 @@ For HTTP transport:
 2. **URL:** `http://localhost:3000/mcp`
 3. Click **Connect**
 
-### Testing with Nanobot (UI Branch Only)
+### Testing with Nanobot
 
-> **Note:** This feature is only available in the `main-ui` branch.
+[Nanobot](https://github.com/coleam00/nanobot) is an AI agent that supports MCP servers with UI capabilities. Use this to interact with the server's interactive UI cards.
 
-[Nanobot](https://github.com/coleam00/nanobot) is an AI agent that supports MCP servers with UI capabilities.
+**Prerequisites:**
 
-1. **Create a `.env` file** in the project root:
+- OpenAI API key (required for Nanobot)
+
+**Setup:**
+
+1. **Create a `.env` file** in the project root with your OpenAI API key:
 
    ```env
    OPENAI_API_KEY=your_openai_api_key_here
@@ -192,7 +183,7 @@ The database includes realistic sample data with friendly codes (E001, P001, C00
 
 - `run_really_long_task` - Simulates long-running operations with progress notifications and cancellation support
 
-**Interactive UI Tools (main-ui branch only):**
+**Interactive UI Tools:**
 
 - `view_task` - Display interactive task card with completion, assignments, and tags
 - `view_employee` - Display employee profile with workload metrics
@@ -274,7 +265,7 @@ contract-manager-mcp/
 │   │   ├── contractAnalysis.ts
 │   │   ├── taskPlanning.ts
 │   │   └── ...
-│   ├── ui/                     # UI components (main-ui only)
+│   ├── ui/                     # UI components
 │   │   ├── taskCard.ts         # Interactive task card
 │   │   ├── employeeCard.ts     # Employee profile card
 │   │   ├── contractDashboard.ts # Contract dashboard
@@ -290,8 +281,8 @@ contract-manager-mcp/
 │   ├── schemas/                # Zod validation
 │   └── types/                  # TypeScript types
 ├── dist/                       # Compiled output
-├── nanobot.yaml                # Nanobot config (main-ui only)
-├── run-nanobot.sh              # Nanobot launcher (main-ui only)
+├── nanobot.yaml                # Nanobot config
+├── run-nanobot.sh              # Nanobot launcher
 ├── package.json
 ├── tsconfig.json
 └── README.md
@@ -316,9 +307,9 @@ SQLite database with auto-initialization and seeding on startup.
 - Many-to-many relationships (employees-tasks, tags-tasks)
 - Audit timestamps
 
-## UI Features (main-ui Branch)
+## UI Features
 
-The `main-ui` branch includes interactive UI cards powered by [@mcp-ui/server](https://www.npmjs.com/package/@mcp-ui/server):
+This server includes interactive UI cards powered by [@mcp-ui/server](https://www.npmjs.com/package/@mcp-ui/server):
 
 ### Interactive Cards
 
@@ -369,6 +360,12 @@ The `.env` file contains development defaults:
 PORT=3000
 NODE_ENV=development
 CORS_ORIGIN=http://localhost:3000,http://localhost:8080
+```
+
+**For Nanobot UI features**, you must also add your OpenAI API key:
+
+```env
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 Customize as needed and restart the server.

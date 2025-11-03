@@ -1,13 +1,18 @@
-import chalk from 'chalk';
 import { config } from 'dotenv';
 import { ContractManagerMCP } from './contractManagerMCP.js';
 import { initializeDatabase } from './database/connection.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { redirectConsoleToFile } from './utils/stdioLogger.js';
 
-// Reminder: Safe logging to stderr will not interfere with Inspector stdio transport
-console.error(chalk.green('[MCP STDIO] Starting MCP server in stdio mode...'));
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 config();
+
+// Redirect all console output to log file to prevent JSON-RPC interference
+redirectConsoleToFile(path.join(__dirname, 'stdio.log'));
 
 const contractManagerMCP = new ContractManagerMCP();
 
@@ -19,17 +24,21 @@ async function start() {
     const transport = new StdioServerTransport(process.stdin, process.stdout);
 
     transport.onclose = () => {
-      console.error(chalk.blue('Stdio transport closed'));
       process.exit(0);
     };
     transport.onerror = err => {
-      console.error(chalk.red('Stdio transport error:', err));
+      console.error('Transport error:', err);
       process.exit(1);
     };
 
     await contractManagerMCP.server.connect(transport);
   } catch (error) {
     console.error('Failed to start server:', error);
+    if (error instanceof Error) {
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
     process.exit(1);
   }
 }

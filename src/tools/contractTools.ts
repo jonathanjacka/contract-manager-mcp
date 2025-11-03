@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { ContractManagerMCP } from '../contractManagerMCP.js';
-import { contractService } from '../services/index.js';
+import { contractService, programService, taskService } from '../services/index.js';
 import { assert } from '../utils/assert.js';
 import {
   contractCodeSchema,
@@ -11,6 +11,9 @@ import {
 import { createText, createContractResourceLink, createContractEmbeddedResource } from './utils.js';
 import type { ToolAnnotations } from '../types/annotations.js';
 import { notifyResourceSubscribers } from '../subscriptions/notifySubscribers.js';
+import { createUIResource } from '@mcp-ui/server';
+import { getContractDashboardUI } from '../ui/contractDashboard.js';
+import { UI_FRAME_SIZES } from '../ui/styles/constants.js';
 
 export async function registerContractTools(agent: ContractManagerMCP) {
   // Initialize state from database
@@ -170,8 +173,61 @@ export async function registerContractTools(agent: ContractManagerMCP) {
     }
   );
 
+  const viewContractTool = agent.server.registerTool(
+    'view_contract',
+    {
+      title: 'View Contract Dashboard',
+      description:
+        'View a contract as an interactive dashboard with all tasks, progress indicators, and filtering options',
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
+      inputSchema: contractCodeSchema,
+    },
+    async ({ code }) => {
+      const contract = await contractService.getByCode(code);
+      assert(contract, `Contract with code "${code}" not found`);
+
+      const program = await programService.getById(contract.program_id);
+      assert(program, `Program not found for contract ${code}`);
+
+      const tasks = await taskService.getByContractCode(code);
+
+      const contractWithDetails = {
+        ...contract,
+        program,
+        tasks,
+      };
+
+      const htmlContent = getContractDashboardUI(contractWithDetails);
+
+      return {
+        content: [
+          createUIResource({
+            uri: `ui://contract/${contract.id}`,
+            content: {
+              type: 'rawHtml',
+              htmlString: htmlContent,
+            },
+            encoding: 'text',
+            uiMetadata: {
+              'preferred-frame-size': [
+                UI_FRAME_SIZES.CONTRACT_DASHBOARD_WIDTH,
+                UI_FRAME_SIZES.CONTRACT_DASHBOARD_HEIGHT,
+              ],
+            },
+          }),
+        ],
+      };
+    }
+  );
+
   // Set initial tool states based on database state (without triggering notifications)
   if (!hasContracts) {
     getContractTool.disable();
+    viewContractTool.disable();
+  } else {
+    // viewContractTool.enable();
   }
 }

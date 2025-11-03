@@ -4,8 +4,10 @@
   "description": "A minimal MCP server for contract management with HTTP transport",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && npm run copy:assets",
+    "copy:assets": "mkdir -p dist/ui/styles && cp src/ui/styles/*.css dist/ui/styles/",
     "start": "node dist/index.js",
+    "nanobot": "./run-nanobot.sh",
     "dev:sse": "nodemon --exec tsx src/index-sse.ts",
     "dev:http": "nodemon --exec tsx src/index-http.ts",
     "dev:sse:with-inspector": "concurrently \"npm run dev:sse\" \"npm run inspector:container\"",
@@ -40,6 +42,7 @@
     "#middleware/*": "./src/middleware/*"
   },
   "dependencies": {
+    "@mcp-ui/server": "^5.13.1",
     "@modelcontextprotocol/sdk": "^1.20.1",
     "chalk": "^5.6.2",
     "cors": "^2.8.5",

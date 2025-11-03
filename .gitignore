@@ -70,6 +70,7 @@ typings/
 .env.development.local
 .env.test.local
 .env.production.local
+nanobot.env
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -125,3 +126,5 @@ build/
 *.sqlite
 *.sqlite3
 src/database/*.sqlite3
+
+ui-guide

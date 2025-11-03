@@ -1,0 +1,11 @@
+agents:
+  contract_manager:
+    name: Contract Manager Assistant
+    model: gpt-4o
+    mcpServers: ContractManagerMCP
+
+mcpServers:
+  ContractManagerMCP:
+    command: node
+    args:
+      - dist/index-stdio.js

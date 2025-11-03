@@ -31,6 +31,10 @@ export const UI_STYLES = {
 export const UI_FRAME_SIZES = {
   TASK_CARD_WIDTH: '900px',
   TASK_CARD_HEIGHT: '1000px',
+  EMPLOYEE_CARD_WIDTH: '900px',
+  EMPLOYEE_CARD_HEIGHT: '1000px',
+  CONTRACT_DASHBOARD_WIDTH: '1200px',
+  CONTRACT_DASHBOARD_HEIGHT: '1000px',
 } as const;
 
 export function getCSSVariables(): string {

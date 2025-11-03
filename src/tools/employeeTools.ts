@@ -20,6 +20,9 @@ import {
   createTaskEmbeddedResource,
 } from './utils.js';
 import type { ToolAnnotations } from '../types/annotations.js';
+import { createUIResource } from '@mcp-ui/server';
+import { getEmployeeCardUI } from '../ui/employeeCard.js';
+import { UI_FRAME_SIZES } from '../ui/styles/constants.js';
 
 export async function registerEmployeeTools(agent: ContractManagerMCP) {
   const initialEmployees = await employeeService.getAll();
@@ -44,6 +47,7 @@ export async function registerEmployeeTools(agent: ContractManagerMCP) {
       editEmployeeTool.enable();
       deleteEmployeeTool.enable();
       removeEmployeeFromTaskTool.enable();
+      viewEmployeeTool.enable();
     } else {
       listEmployeesTool.disable();
       getEmployeeTool.disable();
@@ -52,6 +56,7 @@ export async function registerEmployeeTools(agent: ContractManagerMCP) {
       editEmployeeTool.disable();
       deleteEmployeeTool.disable();
       removeEmployeeFromTaskTool.disable();
+      viewEmployeeTool.disable();
     }
     // addEmployeeTool always enabled
   }
@@ -365,6 +370,55 @@ export async function registerEmployeeTools(agent: ContractManagerMCP) {
     }
   );
 
+  const viewEmployeeTool = agent.server.registerTool(
+    'view_employee',
+    {
+      title: 'View Employee Card',
+      description:
+        'View an employee as an interactive card showing their details, workload, and assigned tasks',
+      annotations: {
+        readOnlyHint: true,
+        openWorldHint: false,
+      } satisfies ToolAnnotations,
+      inputSchema: employeeCodeSchema,
+    },
+    async ({ code }) => {
+      const employee = await employeeService.getByCode(code);
+      assert(employee, `Employee with code "${code}" not found`);
+
+      const tasks = await db('task_assignments')
+        .join('tasks', 'task_assignments.task_id', 'tasks.id')
+        .where('task_assignments.employee_id', employee.id)
+        .select('tasks.*');
+
+      const employeeWithTasks = {
+        ...employee,
+        tasks,
+      };
+
+      const htmlContent = getEmployeeCardUI(employeeWithTasks);
+
+      return {
+        content: [
+          createUIResource({
+            uri: `ui://employee/${employee.id}`,
+            content: {
+              type: 'rawHtml',
+              htmlString: htmlContent,
+            },
+            encoding: 'text',
+            uiMetadata: {
+              'preferred-frame-size': [
+                UI_FRAME_SIZES.EMPLOYEE_CARD_WIDTH,
+                UI_FRAME_SIZES.EMPLOYEE_CARD_HEIGHT,
+              ],
+            },
+          }),
+        ],
+      };
+    }
+  );
+
   // Set initial tool states
   if (!hasEmployees) {
     listEmployeesTool.disable();
@@ -374,5 +428,8 @@ export async function registerEmployeeTools(agent: ContractManagerMCP) {
     editEmployeeTool.disable();
     deleteEmployeeTool.disable();
     removeEmployeeFromTaskTool.disable();
+    viewEmployeeTool.disable();
+  } else {
+    viewEmployeeTool.enable();
   }
 }

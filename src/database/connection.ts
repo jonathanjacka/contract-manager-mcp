@@ -7,6 +7,11 @@ import { logger } from '../utils/logger.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Detect if we're running from compiled dist or source
+const isCompiledDist = __dirname.includes('/dist/');
+const migrationExtension = isCompiledDist ? 'js' : 'ts';
+const migrationLoadExtensions = isCompiledDist ? ['.js'] : ['.ts'];
+
 const dbConfig: Knex.Config = {
   client: 'sqlite3',
   connection: {
@@ -15,13 +20,13 @@ const dbConfig: Knex.Config = {
   useNullAsDefault: true,
   migrations: {
     directory: path.join(__dirname, 'migrations'),
-    extension: 'js',
-    loadExtensions: ['.js'],
+    extension: migrationExtension,
+    loadExtensions: migrationLoadExtensions,
   },
   seeds: {
     directory: path.join(__dirname, 'seeds'),
-    extension: 'js',
-    loadExtensions: ['.js'],
+    extension: migrationExtension,
+    loadExtensions: migrationLoadExtensions,
   },
   pool: {
     afterCreate: (conn: any, done: any) => {

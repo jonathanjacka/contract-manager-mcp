@@ -228,6 +228,6 @@ export async function registerContractTools(agent: ContractManagerMCP) {
     getContractTool.disable();
     viewContractTool.disable();
   } else {
-    viewContractTool.enable();
+    // viewContractTool.enable();
   }
 }

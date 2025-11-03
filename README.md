@@ -4,6 +4,19 @@ A demonstration [Model Context Protocol](https://modelcontextprotocol.io) (MCP) 
 
 Built with TypeScript, Express.js, and SQLite.
 
+## Branch Structure
+
+This project has two main branches:
+
+- **`main`** - Core MCP server without UI features (original implementation)
+- **`main-ui`** - Includes interactive UI cards powered by [@mcp-ui/server](https://www.npmjs.com/package/@mcp-ui/server)
+
+**Switch to the UI branch to explore interactive card features:**
+
+```bash
+git checkout main-ui
+```
+
 ## Quick Start
 
 ### Prerequisites
@@ -116,6 +129,33 @@ For HTTP transport:
 2. **URL:** `http://localhost:3000/mcp`
 3. Click **Connect**
 
+### Testing with Nanobot (UI Branch Only)
+
+> **Note:** This feature is only available in the `main-ui` branch.
+
+[Nanobot](https://github.com/coleam00/nanobot) is an AI agent that supports MCP servers with UI capabilities.
+
+1. **Create a `.env` file** in the project root:
+
+   ```env
+   OPENAI_API_KEY=your_openai_api_key_here
+   ```
+
+2. **Build and run:**
+
+   ```bash
+   npm run build
+   npm run nanobot
+   ```
+
+The `nanobot` script automatically loads your API key from `.env` and starts Nanobot with the MCP server configured.
+
+**Interactive UI Cards Available:**
+
+- `view_task` - Interactive task card with completion tracking, employee assignment, and tag management
+- `view_employee` - Employee profile with workload statistics and assigned tasks
+- `view_contract` - Full contract dashboard with task filtering, sorting, and metrics
+
 ## Available Scripts
 
 ### Preferred for development with stdio transport
@@ -151,6 +191,12 @@ The database includes realistic sample data with friendly codes (E001, P001, C00
 **Progress Demonstration:**
 
 - `run_really_long_task` - Simulates long-running operations with progress notifications and cancellation support
+
+**Interactive UI Tools (main-ui branch only):**
+
+- `view_task` - Display interactive task card with completion, assignments, and tags
+- `view_employee` - Display employee profile with workload metrics
+- `view_contract` - Display contract dashboard with filtering and sorting
 
 Find implementations in: `src/tools/`
 
@@ -228,12 +274,24 @@ contract-manager-mcp/
 │   │   ├── contractAnalysis.ts
 │   │   ├── taskPlanning.ts
 │   │   └── ...
+│   ├── ui/                     # UI components (main-ui only)
+│   │   ├── taskCard.ts         # Interactive task card
+│   │   ├── employeeCard.ts     # Employee profile card
+│   │   ├── contractDashboard.ts # Contract dashboard
+│   │   └── styles/             # Shared styling
+│   │       ├── constants.ts    # Color palette & dimensions
+│   │       ├── loader.ts       # CSS file loader
+│   │       ├── taskCard.css
+│   │       ├── employeeCard.css
+│   │       └── contractDashboard.css
 │   ├── services/               # Business logic
 │   ├── database/               # SQLite + Knex
 │   ├── subscriptions/          # Subscription manager
 │   ├── schemas/                # Zod validation
 │   └── types/                  # TypeScript types
 ├── dist/                       # Compiled output
+├── nanobot.yaml                # Nanobot config (main-ui only)
+├── run-nanobot.sh              # Nanobot launcher (main-ui only)
 ├── package.json
 ├── tsconfig.json
 └── README.md
@@ -257,6 +315,51 @@ SQLite database with auto-initialization and seeding on startup.
 - Cascade deletes
 - Many-to-many relationships (employees-tasks, tags-tasks)
 - Audit timestamps
+
+## UI Features (main-ui Branch)
+
+The `main-ui` branch includes interactive UI cards powered by [@mcp-ui/server](https://www.npmjs.com/package/@mcp-ui/server):
+
+### Interactive Cards
+
+**Task Card** (`view_task` tool):
+
+- Real-time completion tracking (0-10 scale)
+- Employee assignment/removal
+- Tag management (add/remove)
+- Visual progress indicators
+- Contract and program context
+
+**Employee Card** (`view_employee` tool):
+
+- Contact information display
+- Workload statistics (total, completed, in-progress, not-started)
+- Overall completion rate with progress bar
+- List of assigned tasks with quick view buttons
+
+**Contract Dashboard** (`view_contract` tool):
+
+- Contract overview with task metrics
+- Overall completion percentage
+- Task filtering (All, Completed, In Progress, Not Started)
+- Sorting options (by name, by completion)
+- Add Task, View, and Edit buttons
+- Detailed contract information
+
+### Design System
+
+- **Color Palette**: Monochromatic blue/cyan theme with 8 harmonious colors
+- **Typography**: Lato font family from Google Fonts
+- **Architecture**: Centralized styling constants for consistency
+- **Responsive**: Frame sizes optimized for different card types
+- **Interactive**: postMessage API for seamless tool communication
+
+### Technical Implementation
+
+- **Raw HTML**: Self-contained cards with embedded CSS and JavaScript
+- **Communication**: postMessage API for iframe-to-parent tool calls
+- **Styling**: CSS variables generated from TypeScript constants
+- **Build Pipeline**: Automatic CSS asset copying to dist folder
 
 ## Environment Configuration
 
